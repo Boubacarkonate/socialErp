@@ -12,3 +12,53 @@ datasource db {
   provider = "postgresql"
   url      = env("DATABASE_URL")
 }
+
+model User {
+  id          Int        @id @default(autoincrement())
+  clerkUserId String     @unique
+  firstname   String
+  lastname    String
+  email       String     @unique
+  role        String     @default("user") // user | admin
+  photo       String?
+  createdAt   DateTime   @default(now())
+  updatedAt   DateTime   @updatedAt
+  productsId  Product[] // Produits créés par l'utilisateur
+  orders      Order[] // Commandes passées par l'utilisateur
+  PlanningId  Planning[] //Planning créé
+}
+
+model Product {
+  id          Int      @id @default(autoincrement())
+  name        String
+  description String?
+  image       String?
+  price       Float
+  stock       Int      @default(0) // Quantité en stock
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  User        User?    @relation(fields: [userId], references: [id])
+  userId      Int?
+  orders      Order[] // Commandes associées à ce produit
+}
+
+model Order {
+  id         Int      @id @default(autoincrement())
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+  quantity   Int // Quantité de produit dans la commande
+  totalPrice Float // Prix total pour la commande
+  user       User     @relation(fields: [userId], references: [id])
+  userId     Int // Référence à l'utilisateur
+  product    Product  @relation(fields: [productId], references: [id])
+  productId  Int // Référence au produit
+}
+
+model Planning {
+  id        Int      @id @default(autoincrement())
+  title     String // Nom ou description de l'événement
+  startDate DateTime // Date et heure de début
+  endDate   DateTime // Date et heure de fin
+  user      User     @relation(fields: [userId], references: [id])
+  userId    Int // Référence à l'utilisateur
+}

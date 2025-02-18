@@ -1,5 +1,10 @@
+import { frFR } from '@clerk/localizations';
+import { ClerkProvider } from "@clerk/nextjs";
+import { shadesOfPurple } from '@clerk/themes';
 import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
+import { ProductsProvider } from "./Context/CartContext";
+import { SideBarProvider } from "./Context/SideBarContext";
 import "./globals.css";
 
 const geistSans = Geist({
@@ -23,12 +28,27 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en">
-      <body
-        className={`${geistSans.variable} ${geistMono.variable} antialiased`}
-      >
-        {children}
-      </body>
-    </html>
+    <ClerkProvider localization={frFR} appearance={{ baseTheme: shadesOfPurple }}>
+      <html lang="en">
+        <body className={`${geistSans.variable} ${geistMono.variable} antialiased`}>
+          <SideBarProvider>
+            <ProductsProvider>
+              {/* ✅ Conteneur bien positionné pour le bouton */}
+              {/* <NavBar /> */}
+              {/* <div className="absolute right-0 top-0 p-4 flex items-center">
+                <SignedOut>
+                  <SignInButton />
+                </SignedOut>
+                <SignedIn>
+                  <UserButton showName />
+                </SignedIn>
+              </div> */}
+
+              {children}
+            </ProductsProvider>
+          </SideBarProvider>
+        </body>
+      </html>
+    </ClerkProvider>
   );
 }

@@ -5,7 +5,7 @@ import Link from "next/link";
 import Header from "./components/hearder/Header";
 
 export default function Home() {
-  const { isSignedIn, user, isLoaded } = useUser()
+  const { user, isLoaded } = useUser()
 
   if (!isLoaded) {
     return <div>Loading...</div>

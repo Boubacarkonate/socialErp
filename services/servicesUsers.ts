@@ -10,7 +10,7 @@ type User = {
   // Fonction pour récupérer les utilisateurs de l'API route user
  export const fetchUsers = async (): Promise<User[]> => {
     try {
-      const response = await fetch("http://localhost:3000/api/user", {
+      const response = await fetch("http://social-nms98qztk-bs-projects-04d44186.vercel.app/api/user", {
         next: { revalidate: 10 }, 
       });
       if (!response.ok) throw new Error("Erreur lors de la récupération des utilisateurs");

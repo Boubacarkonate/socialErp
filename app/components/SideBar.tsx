@@ -6,7 +6,7 @@ export default function SideBar({ role }) {
   const { isOpen, toggleSidebar } = useSideBar();
 
   const menuItemsAdmin = [
-    { name: "Accueil", icon: "🏠", link: "/" },
+    { name: "Accueil", icon: "🏠", link: "/admin" },
     { name: "Gestion des utilisateurs", icon: "👤", link: "/admin/utilisateurs" },
     { name: "Gestion des produits", icon: "📦", link: "/admin/produits" },
     { name: "Gestion de l'équipe", icon: "🗓️", link: "/admin/planning" },
@@ -14,7 +14,7 @@ export default function SideBar({ role }) {
   ];
 
   const menuItemsTeam = [
-    { name: "Accueil", icon: "🏠", link: "/" },
+    { name: "Accueil", icon: "🏠", link: "/team" },
     { name: "Gestion des produits", icon: "📦", link: "/team/produits" },
     { name: "Voir le planning", icon: "🗓️", link: "/team/planning" },
     // { name: "Paramètres", icon: "⚙️", link: "/settings" },

@@ -33,7 +33,7 @@ function ListProducts() {
         const data = await getAllProducts();
         setProducts(data);
       } catch (err) {
-        setError("Impossible de charger les produits. Veuillez réessayer.", err);
+        setError("Impossible de charger les produits. Veuillez réessayer." + err);
       } finally {
         setLoading(false);
       }
@@ -43,13 +43,23 @@ function ListProducts() {
   }, []);
 
   useEffect(() => {
-    const fetchUserRole = async () => {
-      const userData = await getOneUser(user?.id);
-      setUserRole(userData.role);
-    };
-    fetchUserRole();
-  }, [user]);
+    if (!user?.id) return; // Si pas d'ID utilisateur, ne pas effectuer l'appel
 
+    const fetchDataRoleUser = async () => {
+      try {
+        const data = await getOneUser(user.id);
+        if (data) {
+          setUserRole(data.role); // Récupération du rôle de l'utilisateur
+        } else {
+          console.error("Utilisateur non trouvé !");
+        }
+      } catch (error) {
+        console.error('Erreur lors de la récupération du rôle utilisateur :', error);
+      }
+    };
+
+    fetchDataRoleUser();
+  }, [user?.id]); // Dépendance uniquement sur `user?.id` pour effectuer l'appel lorsque l'ID est disponible
   const roleStyles = {
     admin: {
       title: "text-3xl text-center mb-6 font-bold text-amber-300",

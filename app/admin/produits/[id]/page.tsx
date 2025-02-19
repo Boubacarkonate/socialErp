@@ -1,71 +1,88 @@
+"use client";
+
 import { getOneProduct } from "@/app/actions/products";
 import Header from "@/app/components/hearder/Header";
 import { ButtonBack } from "@/app/ui/Button";
 import { authentification_data } from "@/hooks/autentification&data";
 import { getUserDetails } from "@/services/servicesUsers";
-import { GetServerSideProps } from 'next';
 import Link from "next/link";
+import { useParams } from "next/navigation";
+import { useEffect, useState } from "react";
 
-// Définir le type pour Props
-type Props = {
-  productData: {
-    id: number;
-    name: string;
-    description: string;
-    price: number;
-    userId: number;
-  };
-  userData: {
-    role: string;
-  };
-};
+const DetailProduit = () => {
+  const params = useParams();
+  const [productData, setProductData] = useState(null);
+  const [userData, setUserData] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
 
-const DetailProduit = ({ productData, userData }: Props) => {
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        if (!params?.id) {
+          throw new Error("ID de produit manquant");
+        }
+
+        const id = parseInt(params.id, 10);
+        const { userId } = await authentification_data();
+        const userDetails = await getUserDetails(userId);
+        const product = await getOneProduct(id);
+
+        setUserData(userDetails);
+        setProductData(product);
+      } catch (err) {
+        setError(err.message);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchData();
+  }, [params?.id]);
+
+  if (loading) return <p className="text-center text-gray-500">Chargement...</p>;
+  if (error) return <p className="text-center text-red-500">{error}</p>;
+
   return (
     <div className="px-4 py-8 max-w-4xl mx-auto">
       <Header />
       <h1 className="text-3xl font-extrabold text-gray-800 text-center mb-6">
         Détail du Produit 🛍️
       </h1>
-  
+
       <div className="bg-white shadow-md rounded-lg border border-gray-200 overflow-hidden">
-        {/* Contenu principal */}
         <div className="px-6 py-5">
           <h2 className="text-2xl font-semibold text-gray-800 mb-2">
-            {productData.name}
+            {productData?.name}
           </h2>
           <p className="text-gray-600 text-base leading-relaxed mb-4">
-            {productData.description}
+            {productData?.description}
           </p>
-  
+
           <div className="flex items-center justify-between mb-4">
             <span className="text-gray-900 font-semibold text-xl">
-              {productData.price?.toFixed(2)} €
+              {productData?.price?.toFixed(2)} €
             </span>
-            <span className="text-gray-500 text-sm">
-              ID: {productData.id}
-            </span>
+            <span className="text-gray-500 text-sm">ID: {productData?.id}</span>
           </div>
         </div>
-  
-        {/* Informations supplémentaires */}
+
         <div className="bg-gray-100 px-6 py-3">
           <p className="text-gray-700 text-base">
             Utilisateur associé :{" "}
             <span className="font-medium text-gray-800">
-              {productData.userId || "aucun"}
+              {productData?.userId || "aucun"}
             </span>
           </p>
         </div>
-  
-        {/* Boutons pour l'admin */}
-        {userData.role === "admin" && (
+
+        {userData?.role === "admin" && (
           <div className="px-6 py-4 flex gap-4">
             <button className="bg-blue-500 hover:bg-blue-600 text-white font-semibold py-2 px-5 rounded-lg transition duration-200">
               Ajouter
             </button>
             <Link
-              href={`/produits/${productData.id}/formulaire`}
+              href={`/produits/${productData?.id}/formulaire`}
               className="bg-yellow-500 hover:bg-yellow-600 text-white font-semibold py-2 px-5 rounded-lg transition duration-200"
             >
               Modifier
@@ -73,35 +90,12 @@ const DetailProduit = ({ productData, userData }: Props) => {
           </div>
         )}
       </div>
-  
-      {/* Bouton retour */}
+
       <div className="mt-8 flex justify-center">
         <ButtonBack />
       </div>
     </div>
   );
-};
-
-export const getServerSideProps: GetServerSideProps = async (context) => {
-  const { id } = context.params as { id: string }; // Récupérer l'ID depuis les paramètres de l'URL
-
-  try {
-    const { userId } = await authentification_data();
-    const userData = await getUserDetails(userId);
-    const productData = await getOneProduct(parseInt(id)); // Convertir l'ID en entier
-
-    return {
-      props: {
-        productData,
-        userData,
-      },
-    };
-  } catch (error) {
-    console.error(error);
-    return {
-      notFound: true,
-    };
-  }
 };
 
 export default DetailProduit;

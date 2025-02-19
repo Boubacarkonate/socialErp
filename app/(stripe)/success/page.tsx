@@ -1,9 +1,18 @@
-'use client';
+"use client";
 
 import Link from 'next/link';
 import { useSearchParams } from 'next/navigation';
+import { Suspense } from 'react';
 
 export default function SuccessPage() {
+  return (
+    <Suspense fallback={<p className="text-center">Chargement...</p>}>
+      <SuccessContent />
+    </Suspense>
+  );
+}
+
+function SuccessContent() {
   const searchParams = useSearchParams();
   const token = searchParams.get('token'); // Récupération du token envoyé par Stripe (customer ID)
 

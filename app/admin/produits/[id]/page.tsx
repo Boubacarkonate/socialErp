@@ -49,6 +49,7 @@ const DetailProduit = () => {
 
         const product = await getOneProduct(id);  // Récupère les données du produit
         setProductData(product);
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
       } catch (err: any) {
         setError(err.message || "Une erreur est survenue.");
       } finally {

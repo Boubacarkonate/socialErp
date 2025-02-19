@@ -66,8 +66,13 @@ export async function paymentStripe(data: DataStripe) {
 
     // 6. Retourner l'URL de redirection
     return { message: "Session créée avec succès", url: checkoutSession.url };
-  } catch (error: any) {
-    console.error("Erreur lors de la création de la session Stripe :", error.message);
-    throw new Error(`Erreur Stripe : ${error.message}`);
-  }
+  } catch (error: unknown) {
+    if (error instanceof Error) {
+        console.error("Erreur lors de la création de la session Stripe :", error.message);
+        throw new Error(`Erreur Stripe : ${error.message}`);
+    } else {
+        console.error("Erreur inconnue lors de la création de la session Stripe :", error);
+        throw new Error("Erreur Stripe inconnue");
+    }
+}
 }

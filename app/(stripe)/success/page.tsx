@@ -21,7 +21,7 @@ export default function SuccessPage() {
       <div className="mt-8">
         <Link href="/">
           <p className="px-6 py-3 bg-green-600 text-white rounded-lg shadow-lg hover:bg-green-500">
-            Retour à l'accueil
+            {`Retour à l'accueil`}
           </p>
         </Link>
       </div>

@@ -5,7 +5,7 @@ export default function SignInPage() {
     <div className="flex items-center justify-center flex-col w-full h-screen bg-gray-100 p-8">
       <div className="bg-white shadow-lg rounded-lg p-6 text-center max-w-md w-full">
         <h1 className="text-3xl font-bold text-red-600">Accès Restreint 🚫</h1>
-        <p className="text-gray-700 mt-4">L'inscription est désactivée. Utilisez uniquement les identifiants de test fournis.</p>
+        <p className="text-gray-700 mt-4">{`L'inscription est désactivée. Utilisez uniquement les identifiants de test fournis.`}</p>
         
         <div className="mt-6 p-4 bg-gray-50 rounded-lg border">
           <h2 className="text-xl font-semibold">Utilisez les identifiants de test :</h2>
@@ -35,7 +35,7 @@ export default function SignInPage() {
               </tr>
             </tbody>
           </table>
-          <p className="text-red-500 mt-2">⚠️ L'inscription est désactivée. Utilisez uniquement ces identifiants.</p>
+          <p className="text-red-500 mt-2">⚠️{`L'inscription est désactivée. Utilisez uniquement ces identifiants.`} </p>
         </div>
 
         <Link href="/sign-in">

@@ -97,7 +97,7 @@ export const CreatePlanning =  () => {
 
         <div className="mb-4">
           <label className="block text-amber-300 font-medium text-sm mb-2" htmlFor="userId">
-            Choisir un membre de l'équipe
+            {`Choisir un membre de l'équipe`}
           </label>
           <select
         id="userId"

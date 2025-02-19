@@ -82,7 +82,7 @@ const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || "http://localhost:3000";
       { message: "Session créée avec succès", url: checkoutSession.url },
       { status: 200 }
     );
-
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
   } catch (error: any) {
     console.error("Erreur => ", error);
     return NextResponse.json({ error: error.message }, { status: 500 });

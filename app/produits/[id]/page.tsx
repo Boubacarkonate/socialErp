@@ -10,10 +10,22 @@ import Link from "next/link";
 import { useParams } from "next/navigation";
 import { useEffect, useState } from "react";
 
+interface PropsProduct {
+  id: number;
+  name: string;
+  description: string;
+  price: number;
+  stock: number;
+};
+
+interface ProspUser {
+  role: string;
+};
+
 function DetailProduit() {
   const { id } = useParams(); // Utilisation correcte de useParams()
-  const [productData, setProductData] = useState<any>(null);
-  const [userData, setUserData] = useState<any>(null);
+  const [productData, setProductData] = useState<PropsProduct>(null);
+  const [userData, setUserData] = useState<ProspUser>(null);
   const { addToCart } = useProductsContext();
   const { user } = useUser();
 

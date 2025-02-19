@@ -29,7 +29,7 @@ async function page() {
               ) : (
                 // Si l'utilisateur n'est pas un administrateur, affichage d'un message alternatif
                 <div className="text-center text-white p-4">
-                  Vous n'avez pas les droits d'accès nécessaires.
+                  {`Vous n'avez pas les droits d'accès nécessaires.`}
                 </div>
               )}
             </div>

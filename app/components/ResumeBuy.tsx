@@ -46,7 +46,7 @@ export default async function ResumeBuy() {
               ))}
             </div>
           ) : (
-            <div>Vous n'avez pas encore de facture</div>
+            <div>{`Vous n'avez pas encore de facture.`}</div>
           )}
           <PdfGenerator />
         </div>

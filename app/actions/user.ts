@@ -137,7 +137,7 @@ export async function deleteUser(clerkUserId: string) {
       where: {clerkUserId },
     });
     return productToDelete;
-
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
   } catch (error: any) {
     console.error("Erreur lors de la suppression de l'utilisateur :", error);
 

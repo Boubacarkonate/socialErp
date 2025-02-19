@@ -12,7 +12,7 @@ export default function CancelPage() {
       <div className="mt-8">
         <Link href="/">
           <p className="px-6 py-3 bg-gray-800 text-white rounded-lg shadow-lg hover:bg-gray-700">
-            Retour à l'accueil
+            {`Retour à l'accueil`}
           </p>
         </Link>
       </div>

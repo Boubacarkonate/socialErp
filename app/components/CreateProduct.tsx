@@ -25,9 +25,9 @@ function CreateProduct() {
     fetchDataUserBdd();
   }, [user]);
 
-const displayImage = (e) => {
-  setImage(e.target.value);
-}
+// const displayImage = (e) => {
+//   setImage(e.target.value);
+// }
 
   // Gestionnaire pour mettre à jour les champs dynamiquement
 
@@ -87,7 +87,7 @@ const displayImage = (e) => {
 
        <input type="hidden" name="id" />
        <div className="flex flex-col w-full">
-          <label className="block text-gray-700 text-sm font-bold mb-2" htmlFor="name" className={`${roleStyles[role]?.label}`}>
+          <label className={`${roleStyles[role]?.label}`} htmlFor="name" >
             Nom du produit
           </label>
           <input

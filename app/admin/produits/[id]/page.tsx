@@ -3,16 +3,30 @@
 import { getOneProduct } from "@/app/actions/products";
 import Header from "@/app/components/hearder/Header";
 import { ButtonBack } from "@/app/ui/Button";
-import { authentification_data } from "@/hooks/autentification&data";
 import { getUserDetails } from "@/services/servicesUsers";
+import { useUser } from "@clerk/nextjs";
 import Link from "next/link";
 import { useParams } from "next/navigation";
 import { useEffect, useState } from "react";
 
+interface PropsProduct {
+  id: number;
+  name: string;
+  description: string;
+  price: number;
+  userId: number;
+}
+
+interface PropsUser {
+  id: number | string;
+  role: string;
+}
+
 const DetailProduit = () => {
   const params = useParams();
-  const [productData, setProductData] = useState(null);
-  const [userData, setUserData] = useState(null);
+  const {user} = useUser();
+  const [productData, setProductData] = useState<PropsProduct>(null);
+  const [userData, setUserData] = useState<PropsUser>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
@@ -24,8 +38,7 @@ const DetailProduit = () => {
         }
 
         const id = parseInt(params.id, 10);
-        const { userId } = await authentification_data();
-        const userDetails = await getUserDetails(userId);
+        const userDetails = await getUserDetails(user?.id);
         const product = await getOneProduct(id);
 
         setUserData(userDetails);

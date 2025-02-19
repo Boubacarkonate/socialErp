@@ -18,7 +18,7 @@ export default async function ResumeBuy() {
 
     // console.log("3 : ", detailsBuy?.firstname);
     
-    const listOrders = await productsByUser(userData.id);
+    const listOrders = await productsByUser(userData?.id);
 
     console.log("4 : ",listOrders);
 
@@ -31,7 +31,7 @@ export default async function ResumeBuy() {
         <div>
           {listOrders?.length > 0 ? (
             <div className="h-80 overflow-y-auto space-y-4">
-              {listOrders.map((element) => (
+              {listOrders?.map((element) => (
                 <p
                   key={element.id}
                   className="bg-white shadow rounded-lg p-4 border border-gray-200"

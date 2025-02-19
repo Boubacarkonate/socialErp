@@ -24,11 +24,11 @@ interface PropsUser {
 
 const DetailProduit = () => {
   const params = useParams();
-  const {user} = useUser();
-  const [productData, setProductData] = useState<PropsProduct>(null);
-  const [userData, setUserData] = useState<PropsUser>(null);
+  const { user } = useUser();
+  const [productData, setProductData] = useState<PropsProduct | null>(null);  // Correct type to allow null
+  const [userData, setUserData] = useState<PropsUser | null>(null);  // Correct type to allow null
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(null);
+  const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
     const fetchData = async () => {
@@ -38,20 +38,26 @@ const DetailProduit = () => {
         }
 
         const id = parseInt(params.id, 10);
-        const userDetails = await getUserDetails(user?.id);
-        const product = await getOneProduct(id);
+        
+        // Assure-toi que l'utilisateur est bien connecté avant de récupérer ses informations
+        if (user?.id) {
+          const userDetails = await getUserDetails(user?.id);  // Récupère les détails de l'utilisateur
+          setUserData(userDetails);
+        } else {
+          throw new Error("Utilisateur non connecté");
+        }
 
-        setUserData(userDetails);
+        const product = await getOneProduct(id);  // Récupère les données du produit
         setProductData(product);
-      } catch (err) {
-        setError(err.message);
+      } catch (err: any) {
+        setError(err.message || "Une erreur est survenue.");
       } finally {
         setLoading(false);
       }
     };
 
     fetchData();
-  }, [params?.id]);
+  }, [params?.id, user?.id]);  // Ajout de 'user?.id' comme dépendance pour s'assurer que l'utilisateur est connecté
 
   if (loading) return <p className="text-center text-gray-500">Chargement...</p>;
   if (error) return <p className="text-center text-red-500">{error}</p>;

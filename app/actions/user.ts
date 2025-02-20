@@ -43,9 +43,9 @@ export async function upsertUser(id:number, clerkUserId: string, firstname: stri
 
 export async function getOneUser(clerkUserId: string) {
 
-  if (!clerkUserId || typeof clerkUserId !== "string") {
-    throw new Error("Un ID valide doit être fourni pour récupérer un utilisateur.");
-  }
+  // if (!clerkUserId || typeof clerkUserId !== "string") {
+  //   throw new Error("Un ID valide doit être fourni pour récupérer un utilisateur.");
+  // }
 
   try {
     const one_user = await prisma.user.findUnique({

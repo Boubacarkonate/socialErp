@@ -141,7 +141,7 @@ const DetailFormOneUser  = ({ params }: Props) => {
                 {/* {data.id && <input type="hidden" name="id" value={data.id} />} */}
       <div className="flex justify-center items-center flex-col">   
 <label htmlFor="photo" className={`${roleStyles[data.role]?.label}`}>Photo</label>
-        <input type="text" name="photo" value={data.photo}onChange={changeValue} className={`${roleStyles[data.role]?.input}`} disabled/>
+        <input type="text" name="photo" value={data.photo}onChange={changeValue} className={`${roleStyles[data.role]?.input} cursor-not-allowed grayscale `} disabled/>
       
                 {/* Affiche la photo si une URL valide est saisie */}
         {data.photo && (
@@ -177,7 +177,7 @@ const DetailFormOneUser  = ({ params }: Props) => {
 </div>
         
 <label htmlFor="nom" className={`${roleStyles[data.role]?.label} w-full mt-8`}>Email</label>
-          <input type="text" readOnly name="email" className={`${roleStyles[data.role]?.input}`} placeholder="email" value={data.email}  onChange={changeValue} />
+          <input type="text" readOnly name="email" className={`${roleStyles[data.role]?.input} cursor-not-allowed grayscale `} placeholder="email" value={data.email}  onChange={changeValue} />
        {
         data.role !== 'admin' ? ( 
         <input type="hidden" name="role" value={data.role} />

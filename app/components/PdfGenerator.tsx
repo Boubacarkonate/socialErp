@@ -33,7 +33,6 @@ export default function PdfGenerator() {
       doc.text('Facture Client', 10, 10);
 
       doc.setFontSize(12);
-      doc.text(`Nom du Client : ${user?.fullName}`, 10, 20);
       doc.text(`Date : ${new Date().toLocaleDateString()}`, 10, 30);
 
       // Génération du tableau avec autoTable

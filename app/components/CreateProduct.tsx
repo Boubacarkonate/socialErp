@@ -10,7 +10,7 @@ import { getOneUser } from "../actions/user";
 
 
 function CreateProduct() {
-  const [image, setImage] = useState<string>("");
+  const [image, setImage] = useState<string>("/produit.png");
   const [role, setRole] = useState<string>("");
   const [alertMessage, setAlertMessage] = useState<string | null>(null);
 
@@ -115,7 +115,7 @@ function CreateProduct() {
         )}
           <input
             className={`${roleStyles[role]?.input}`}
-            type="text"
+            type="hidden"
             name="image"
             value={image}
             onChange={(e)=> {setImage(e.target.value)}}

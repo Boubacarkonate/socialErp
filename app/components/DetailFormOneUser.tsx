@@ -49,7 +49,7 @@ const DetailFormOneUser  = ({ params }: Props) => {
        lastname: userData?.lastname || '',
        email: userData?.email || '',
        role: userData?.role || '',
-       photo: userData?.photo || ''
+       photo: userData?.photo || 'https://cdn.pixabay.com/photo/2013/07/12/19/14/avatar-154375_1280.png'
      })
    }
     

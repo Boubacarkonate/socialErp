@@ -88,7 +88,7 @@ function ListProducts() {
             : "text-3xl font-bold text-gray-900 text-center mb-6"
         }
       >
-        Découvrez Nos Produits 🛍️
+        Nos Produits eco-respnsables 🛍️
       </h1>
 
       {loading && (
@@ -109,9 +109,9 @@ function ListProducts() {
                   <Image
                     src={product.image}
                     alt={product.name}
-                    width={256}
-                    height={256}
-                    className="w-full h-48 object-cover"
+                    width={100}
+                    height={100}
+                    className="w-full h-48 pt-2 object-contain"
                   />
                 </Link>
 

@@ -1,8 +1,4 @@
 import { getOneUser } from "@/app/actions/user";
-import dotenv from 'dotenv';
-
-
-dotenv.config();
 
 type User = {
     id: number;
@@ -14,10 +10,8 @@ type User = {
   // Fonction pour récupérer les utilisateurs de l'API route user
  export const fetchUsers = async (): Promise<User[]> => {
     try {
-      const apiUrl = process.env.NEXT_PUBLIC_API_URL;
-
-    const response = await fetch(apiUrl, {
-      next: { revalidate: 10 }, 
+      const response = await fetch("https://social-erp.vercel.app/api/user", {   //http://localhost:3000/api/user
+        next: { revalidate: 10 }, 
       });
       if (!response.ok) throw new Error("Erreur lors de la récupération des utilisateurs");
       return await response.json();

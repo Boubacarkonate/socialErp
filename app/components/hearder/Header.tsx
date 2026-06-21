@@ -4,7 +4,7 @@ import { createBuy } from "@/app/actions/order";
 import { paymentStripe } from "@/app/actions/stripe";
 import { getOneUser } from "@/app/actions/user";
 import { useProductsContext } from "@/app/Context/CartContext";
-import { SignedIn, SignedOut, SignInButton, UserButton, useUser } from "@clerk/nextjs";
+import { SignInButton, UserButton, useUser } from "@clerk/nextjs";
 import { Minus, Plus, ShoppingCart, X } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
@@ -115,16 +115,15 @@ export default function Header() {
         </button>
 
         {/* Auth */}
-        <SignedOut>
+        {!user ? (
           <SignInButton>
             <button className="px-4 py-1.5 bg-brand-600 hover:bg-brand-500 text-white text-sm font-semibold rounded-lg transition-all duration-150 shadow-brand">
               Connexion
             </button>
           </SignInButton>
-        </SignedOut>
-        <SignedIn>
+        ) : (
           <UserButton />
-        </SignedIn>
+        )}
       </div>
 
       {/* Cart modal */}

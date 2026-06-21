@@ -1,38 +1,32 @@
-
 import { authentification_data } from "@/hooks/autentification&data";
 import { getUserDetails } from "@/services/servicesUsers";
 import FormUserProfile from "../components/FormUserProfile";
-import Historique from "../components/Historique";
 import Header from "../components/hearder/Header";
-
+import Historique from "../components/Historique";
 
 const DashboardUser = async () => {
-  const { userId } = await authentification_data(); // Authentification utilisateur pour les données Clerk
- 
-  const userData = await getUserDetails(userId); // Récupération des données depuis la bdd. Le paramètre est le clerkUserId
-  console.log('admin', userData);
-  
- /* bg-gradient-to-br from-gray-900 via-gray-800 to-gray-700*/
+  const { userId } = await authentification_data();
+  const userData = await getUserDetails(userId);
+  console.log("user", userData);
+
   return (
-    <div className="min-h-screen bg-gradient-to-tl from-gray-300 via-gray-50 to-gray-200">
+    <div className="min-h-screen bg-surface-900">
       <Header />
-      
-      <div className="flex flex-col gap-20 items-center md:flex-row md:justify-evenly mt-5">
-   
-        <div className=" ">
-          <FormUserProfile />
+      <div className="max-w-5xl mx-auto px-6 py-8">
+        <div className="mb-6">
+          <h1 className="page-title">Mon espace</h1>
+          <p className="text-surface-400 text-sm mt-1">Gérez votre profil et consultez votre historique d&apos;achats.</p>
         </div>
-        { 
-    <div className=" bg-gray-100  flex flex-col justify-center items-center text-slate-900">
-<Historique />
-
-
-
+        <div className="flex flex-col md:flex-row gap-6 items-start">
+          <div className="shrink-0">
+            <FormUserProfile />
+          </div>
+          <div className="flex-1 card p-6 min-w-0">
+            <Historique />
+          </div>
+        </div>
+      </div>
     </div>
-}
-    </div>
-    </div>
-   
   );
 };
 

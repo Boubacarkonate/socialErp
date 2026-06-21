@@ -1,6 +1,7 @@
 'use client'
 
 import { useUser } from "@clerk/nextjs";
+import { Camera, Mail, Shield, User } from "lucide-react";
 import Image from "next/image";
 import { useEffect, useState } from "react";
 import { getOneUser, upsertUsertDATA } from "../actions/user";
@@ -10,240 +11,227 @@ type PropsData = {
   clerkUserId?: string;
   lastname: string;
   firstname: string;
- email: string;
- role: string;
- photo: string;
+  email: string;
+  role: string;
+  photo: string;
+};
 
-}
+const roleBadgeStyles: Record<string, string> = {
+  admin: "badge bg-brand-500/20 text-brand-300 border border-brand-500/30",
+  team:  "badge bg-accent-500/20 text-accent-400 border border-accent-500/30",
+  user:  "badge bg-surface-600/30 text-surface-300 border border-surface-500/30",
+};
 
-// type Props = {
-//   params: { id: string };
-// };
+const roleLabels: Record<string, string> = {
+  admin: "Administrateur",
+  team:  "Équipe",
+  user:  "Utilisateur",
+};
+
 const FormUserProfile = () => {
-// const FormUpdate = ( { params }: Props) => {
   const [alertMessage, setAlertMessage] = useState<string | null>(null);
-  const { user } = useUser();   //propriété de Clerk qui me permet les données de l'utilisateur actuellement 
-
-  // const { id } = params;
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const { user } = useUser();
 
   const [data, setData] = useState<PropsData>({
     clerkUserId: "",
     firstname: "",
-    lastname: '',
-    email: '',
-    role: '',
-    photo: ''
-  })
+    lastname: "",
+    email: "",
+    role: "",
+    photo: "",
+  });
 
   useEffect(() => {
     const fetchData = async () => {
       if (user) {
         try {
           const userData = await getOneUser(user.id);
-  
           setData({
             clerkUserId: userData.clerkUserId || user.id,
-            firstname: userData.firstname || user.firstName || '',
-            lastname: userData?.lastname || user.lastName || '',
-            email: userData?.email || user.emailAddresses[0]?.emailAddress || '',
-            role: userData?.role || '',
-            photo: userData?.photo || user.imageUrl || ''
+            firstname: userData.firstname || user.firstName || "",
+            lastname: userData?.lastname || user.lastName || "",
+            email: userData?.email || user.emailAddresses[0]?.emailAddress || "",
+            role: userData?.role || "",
+            photo: userData?.photo || user.imageUrl || "",
           });
-        } catch (error) {
-          console.error("Error fetching user data:", error);
-          // Vous pouvez gérer ici un fallback si nécessaire
+        } catch {
           setData({
             clerkUserId: user.id,
-            firstname: user.firstName || '',
-            lastname: user.lastName || '',
-            email: user.emailAddresses[0]?.emailAddress || '',
-            role: '',
-            photo: user.imageUrl 
+            firstname: user.firstName || "",
+            lastname: user.lastName || "",
+            email: user.emailAddresses[0]?.emailAddress || "",
+            role: "",
+            photo: user.imageUrl,
           });
         }
       }
     };
-  
     fetchData();
   }, [user]);
-  
 
- const envoyer = async (e) => {
-     e.preventDefault();
-   
-     const formData = new FormData(e.target);
- 
-     try {
-       await upsertUsertDATA(formData);
-       setAlertMessage("Modification avec succès !"); // Afficher le message de succès
-      console.log(formData);
-      
-       // Masquer l'alerte après 3 secondes
-       setTimeout(() => {
-         setAlertMessage(null);
-       }, 3000);
-     } catch (error) {
-       console.error("Erreur :", error);
-     }
-   
-   };
- 
-                           //ce typage signifie que e est un événement qui provient d'un champ HTML <input> ou <select>.
-   const changeValue = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
-     const { name, value } = e.target; // Récupère le nom et la valeur du champ modifié
-     setData((dataExistentes) => ({
-       ...dataExistentes,       // Copie toutes les propriétés existantes dans `data`
-       [name]: value, // Remplace uniquement la propriété correspondant au champ modifié   [name] représente la clé/propriété et value est la valeur de cette clé => c'est le "Computed Property Names" (noms de propriétés calculés): pour définir dynamiquement les clés et ses valeurs 
-     }));
-   };
-
-   const [isModalOpen, setIsModalOpen] = useState(false);
-
-  // Fonction pour ouvrir le modal
-  const openModal = () => setIsModalOpen(true);
-
-  // Fonction pour fermer le modal
-  const closeModal = () => setIsModalOpen(false);
-
-  // Fonction de suppression
-  const handleDelete = () => {
-    alert("Supprimé avec succès !");
-    closeModal();
+  const envoyer = async (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+    const formData = new FormData(e.currentTarget);
+    try {
+      await upsertUsertDATA(formData);
+      setAlertMessage("Profil mis à jour avec succès !");
+      setTimeout(() => setAlertMessage(null), 3000);
+    } catch (error) {
+      console.error("Erreur :", error);
+    }
   };
 
-  const roleStyles = {
-    admin: {
-      form: "bg-gradient-to-br from-gray-900 via-gray-800 to-teal-700 text-gray-900 rounded-badge p-6  max-w-xl",
-      label: "text-amber-300 font-medium text-sm mb-2",
-      input: "bg-amber-100 border-2 border-amber-300 text-gray-900 placeholder-amber-500 rounded-md w-full py-1 px-3 shadow-sm focus:outline-none focus:ring-2 focus:ring-amber-500 focus:border-amber-600 transition-all duration-200 ease-in-out font-medium",
-      button: "bg-amber-600 hover:bg-amber-700 text-white font-medium py-2 px-6 rounded-md w-full focus:outline-none focus:ring-2 focus:ring-amber-400 transition-all duration-200 ease-in-out shadow-sm",
-    },
-    team: {
-      form: "bg-gradient-to-br from-blue-900 via-indigo-700 to-purple-600 rounded-badge p-8 max-w-xl",
-      label: "text-blue-300 font-medium text-sm mb-2",
-      input: "bg-blue-100 border-2 border-blue-400 text-blue-900 placeholder-blue-500 rounded-md w-full py-1 px-3 shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-600 transition-all duration-200 ease-in-out font-medium",
-      button: "bg-blue-500 hover:bg-blue-600 text-white font-medium py-2 px-6 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-400 transition-all duration-200 ease-in-out shadow-sm",
-    },
-    user: {
-      form: "bg-gray-100 text-gray-900 rounded-badge p-6  max-w-xl shadow-md",
-      label: "text-gray-700 font-medium text-sm mb-2",
-      input: "bg-white border border-gray-300 text-gray-900 placeholder-gray-500 rounded-md w-full py-1 px-3 shadow-sm focus:outline-none focus:ring-2 focus:ring-gray-400 focus:border-gray-500 transition-all duration-200 ease-in-out",
-      button: "bg-gray-500 hover:bg-gray-600 text-white font-medium py-2 px-6 rounded-md focus:outline-none focus:ring-2 focus:ring-gray-400 transition-all duration-200 ease-in-out shadow-sm",
-    }
-  };  
+  const changeValue = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
+    const { name, value } = e.target;
+    setData((prev) => ({ ...prev, [name]: value }));
+  };
 
   return (
-    
-     <div className=" items-center justify-center">
+    <div className="w-full max-w-sm">
+      <form onSubmit={envoyer} className="card p-6 space-y-5">
+        {/* Avatar */}
+        <div className="flex flex-col items-center gap-3 pb-4 border-b border-surface-700/50">
+          <div className="relative">
+            {data.photo ? (
+              <Image
+                src={data.photo}
+                alt="Avatar"
+                height={80}
+                width={80}
+                className="rounded-full ring-2 ring-brand-500/40 ring-offset-2 ring-offset-surface-800"
+              />
+            ) : (
+              <div className="w-20 h-20 rounded-full bg-surface-700 flex items-center justify-center ring-2 ring-surface-600">
+                <User size={32} className="text-surface-500" />
+              </div>
+            )}
+            <div className="absolute -bottom-1 -right-1 w-6 h-6 bg-surface-700 border border-surface-600 rounded-full flex items-center justify-center">
+              <Camera size={10} className="text-surface-400" />
+            </div>
+          </div>
+          <input type="hidden" name="photo" value={data.photo} onChange={changeValue} />
 
-      <form onSubmit={envoyer} className={`${roleStyles[data.role]?.form} mt-5`}>
-                {/* Champ ID caché, uniquement utilisé pour l'édition */}
-                {/* {data.id && <input type="hidden" name="id" value={data.id} />} */}
-      <div className="flex justify-center items-center flex-col">   
-      <label htmlFor="photo" className={`${roleStyles[data.role]?.label}`}>Photo</label>
-        <input type="hidden" name="photo" value={data.photo}onChange={changeValue} className={`${roleStyles[data.role]?.input} cursor-not-allowed grayscale `} disabled/>
-      
-                {/* Affiche la photo si une URL valide est saisie */}
-        {data.photo && (
-        <Image src={data.photo} alt="Avatar profil" height={130} width={130} className="rounded-full pt-3" />
+          <div className="text-center">
+            <p className="text-white font-semibold text-sm">{data.firstname} {data.lastname}</p>
+            {data.role && (
+              <span className={`${roleBadgeStyles[data.role] || roleBadgeStyles.user} mt-1 inline-block`}>
+                {roleLabels[data.role] || data.role}
+              </span>
+            )}
+          </div>
+        </div>
+
+        <input type="hidden" name="clerUserId" value={data.clerkUserId} onChange={changeValue} />
+
+        {/* Nom / Prénom */}
+        <div className="grid grid-cols-2 gap-3">
+          <div>
+            <label className="label-field">Nom</label>
+            <input
+              type="text"
+              name="lastname"
+              className="input-field"
+              placeholder="Nom"
+              value={data.lastname}
+              onChange={changeValue}
+            />
+          </div>
+          <div>
+            <label className="label-field">Prénom</label>
+            <input
+              type="text"
+              name="firstname"
+              className="input-field"
+              placeholder="Prénom"
+              value={data.firstname}
+              onChange={changeValue}
+            />
+          </div>
+        </div>
+
+        {/* Email */}
+        <div>
+          <label className="label-field flex items-center gap-1.5">
+            <Mail size={10} />
+            Email
+          </label>
+          <input
+            type="text"
+            name="email"
+            readOnly
+            className="input-field opacity-50 cursor-not-allowed"
+            value={data.email}
+            onChange={changeValue}
+          />
+        </div>
+
+        {/* Rôle */}
+        {data.role === "admin" ? (
+          <div>
+            <label className="label-field flex items-center gap-1.5">
+              <Shield size={10} />
+              Rôle
+            </label>
+            <select name="role" value={data.role} onChange={changeValue} className="input-field">
+              <option value="admin">Administrateur</option>
+              <option value="team">Équipe</option>
+              <option value="user">Utilisateur</option>
+            </select>
+          </div>
+        ) : (
+          <input type="hidden" name="role" value={data.role} />
         )}
-     
-        {/* <label htmlFor="idClerk" className="block text-gray-700 font-bold mb-2 w-full">ID Clerk</label> */}
-        <input type="hidden" name="clerUserId" className="bg-gray-100 text-gray-900 rounded-md px-4 py-2 w-full" value={data.clerkUserId} onChange={changeValue} />
-         
-        <div className="flex items-center justify-between gap-4 mt-8">
-  <div className="flex flex-col w-full">
-    <label htmlFor="lastname" className={`${roleStyles[data.role]?.label}`}>Nom</label>
-    <input
-  type="text"
-  name="lastname"
-  className={`${roleStyles[data.role]?.input}`}
-  placeholder="Nom"
-  value={data.lastname}
-  onChange={changeValue}
-/>
 
-  </div>
+        {/* Actions */}
+        <div className="flex gap-3 pt-1">
+          <button type="submit" className="btn-brand flex-1 text-sm py-2.5">
+            Enregistrer
+          </button>
+          <ButtonActionFunction
+            label="Supprimer"
+            className="btn-danger text-sm py-2.5 px-4"
+            onClick={() => setIsModalOpen(true)}
+          />
+        </div>
+      </form>
 
-  <div className="flex flex-col w-full">
-    <label htmlFor="firstname" className={`${roleStyles[data.role]?.label}`}>Prénom</label>
-    <input
-      type="text"
-      name="firstname"
-      className={`${roleStyles[data.role]?.input}`}
-      placeholder="Prénom"
-      value={data.firstname}
-      onChange={changeValue}
-    />
-  </div>
-</div>
-        
-        <label htmlFor="nom" className={`${roleStyles[data.role]?.label} w-full mt-8`}>Email</label>
-          <input type="text" readOnly name="email" className={`${roleStyles[data.role]?.input} cursor-not-allowed grayscale `} placeholder="email" value={data.email}  onChange={changeValue} />
-       {
-        data.role !== 'admin' ? ( 
-        <input type="hidden" name="role" value={data.role} />
-       ) : (
-          <label htmlFor="nom" className={`${roleStyles[data.role]?.label} w-full pt-2 mt-8 `}>Rôle
-          <select name="role" value={data.role} onChange={changeValue} className={`${roleStyles[data.role]?.input}`}>
-            <option value="admin">ADMIN</option>
-            <option value="team">TEAM</option>
-            <option value="user">USER</option>
-          </select>
-        </label>
-        
-       )
-      }
- <div>
-  <div className="flex space-x-4 mt-6">
-    <button
-      type="submit"
-      className={`${roleStyles[data.role]?.button}`}
-    >
-      Modifier
-    </button>
+      {/* Success toast */}
+      {alertMessage && (
+        <div className="mt-3 flex items-center gap-2 px-4 py-2.5 bg-accent-500/15 border border-accent-500/30 rounded-xl text-accent-400 text-sm font-medium animate-fade-in">
+          <svg className="w-4 h-4 shrink-0" fill="currentColor" viewBox="0 0 20 20">
+            <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
+          </svg>
+          {alertMessage}
+        </div>
+      )}
 
-    <ButtonActionFunction
-        label="Supprimer"
-        className={`${roleStyles[data.role]?.button}`}
-        onClick={openModal}
-      />
-
-      {/* Modal de confirmation */}
+      {/* Delete modal */}
       {isModalOpen && (
-        <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50">
-          <div className="bg-white p-6 rounded-lg shadow-lg w-96">
-            <h3 className="text-lg font-bold mb-4">Êtes-vous sûr ?</h3>
-            <p className="text-gray-700 mb-4">Voulez-vous vraiment supprimer cet élément ? Cette action est irréversible.</p>
-            <div className="flex justify-end gap-4">
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+          <div className="absolute inset-0 bg-black/70 backdrop-blur-sm" onClick={() => setIsModalOpen(false)} />
+          <div className="relative card p-6 w-full max-w-sm animate-fade-in">
+            <h3 className="text-white font-bold text-base mb-2">Confirmer la suppression</h3>
+            <p className="text-surface-400 text-sm mb-6">Cette action est irréversible. Voulez-vous vraiment supprimer ce profil ?</p>
+            <div className="flex gap-3">
               <button
-                onClick={closeModal}
-                className="bg-gray-300 hover:bg-gray-400 text-gray-700 font-medium py-2 px-4 rounded-md"
+                onClick={() => setIsModalOpen(false)}
+                className="btn-ghost flex-1 text-sm"
               >
                 Annuler
               </button>
               <button
-                onClick={handleDelete}
-                className="bg-red-500 hover:bg-red-600 text-white font-medium py-2 px-4 rounded-md"
+                onClick={() => { alert("Supprimé !"); setIsModalOpen(false); }}
+                className="flex-1 bg-red-500 hover:bg-red-600 text-white font-semibold py-2 px-4 rounded-lg text-sm transition-all duration-150"
               >
                 Supprimer
               </button>
             </div>
           </div>
         </div>
-      )}  </div>
-</div>
-
-      </div>
-      </form>
-     
-      {alertMessage && (
-        <p className=" mx-auto text-white text-sm font-bold p-1 bg-green-500 rounded-xl flex items-center justify-center animate-bounce  w-1/2">{alertMessage}</p>
       )}
-      
-     
     </div>
-  )
-}
+  );
+};
 
 export default FormUserProfile;

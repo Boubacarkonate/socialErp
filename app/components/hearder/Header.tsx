@@ -13,230 +13,232 @@ import { FaCcAmex, FaCcMastercard, FaCcVisa, FaCreditCard } from 'react-icons/fa
 
 interface DashboardRole {
   link: string;
-  style: string;
 }
 
 type RoleDashboard = {
   [K in 'admin' | 'team' | 'user']: DashboardRole;
-}
+};
+
+const roleDashBoard: RoleDashboard = {
+  admin: { link: "admin" },
+  team:  { link: "team" },
+  user:  { link: "user" },
+};
 
 export default function Header() {
   const { listProduit, incrementQuantity, decrementQuantity, removeFromCart, clearCart } = useProductsContext();
-  const totalProductCount = listProduit.reduce((total, element) => total + element.quantityProduct, 0);
-  const totalPrice = listProduit.reduce((total, element) => total + element.price * element.quantityProduct, 0);
+  const totalProductCount = listProduit.reduce((total, el) => total + el.quantityProduct, 0);
+  const totalPrice = listProduit.reduce((total, el) => total + el.price * el.quantityProduct, 0);
   const [dataRole, setDataRole] = useState<keyof RoleDashboard | undefined>();
   const { user } = useUser();
 
   const handleBuy = async () => {
     if (!user?.id) {
-      console.error("User not logged in!");
       alert("Veuillez vous connecter pour effectuer un achat.");
       return;
     }
-
     try {
-      // 1. Récupérer les informations utilisateur depuis la base de données
       const dataUser = await getOneUser(user.id);
-      if (!dataUser.id) {
-        console.error("Utilisateur introuvable dans la base de données !");
-        return;
-      }
-
-      // 2. Créer les commandes dans la base de données
+      if (!dataUser.id) return;
       await Promise.all(
-        listProduit.map(async (product) => {
-          await createBuy(dataUser.id, product.id, product.quantityProduct);
-        })
+        listProduit.map((product) => createBuy(dataUser.id, product.id, product.quantityProduct))
       );
-
-      // 3. Appeler l'action server pour Stripe
-      const stripeResponse = await paymentStripe({
-        title: "Achat de produits",
-        price: totalPrice,
-        userId: user.id,
-      });
-
-      // 4. Redirection vers la page Stripe Checkout
-      if (stripeResponse?.url) {
-        window.location.href = stripeResponse.url;
-      } else {
-        console.error("Erreur : URL de paiement Stripe introuvable.");
-        alert("Une erreur est survenue. Veuillez réessayer.");
-      }
+      const stripeResponse = await paymentStripe({ title: "Achat de produits", price: totalPrice, userId: user.id });
+      if (stripeResponse?.url) window.location.href = stripeResponse.url;
+      else alert("Une erreur est survenue. Veuillez réessayer.");
     } catch (error) {
       console.error("Erreur lors de l'achat :", error);
       alert("Une erreur est survenue pendant la transaction.");
     }
   };
 
-  useEffect(()=> {
-    const fecthDataRoleUser = async () => {
+  useEffect(() => {
+    const fetchRole = async () => {
       try {
         const data = await getOneUser(user?.id);
-      setDataRole(data.role);
-      } catch (error) {
-        console.error('utilisateur non récupéré => pas de role pour le dashboard', error);
+        setDataRole(data.role);
+      } catch {
+        // user not loaded yet
       }
-    } 
-    fecthDataRoleUser();
+    };
+    fetchRole();
   }, [user]);
 
-  const roleDashBoard: RoleDashboard = {
-    admin: {
-      link: "admin",
-      style: "cursor-pointer hover:text-amber-200 hover:shadow-amber-400 hover:bg-teal-800 hover:scale-105 transition duration-200 transition hidden sm:block"
-    },
-    team: {
-      link: "team",
-      style: "cursor-pointer hover:text-purple-200 hover:bg-purple-500 hover:shadow-indigo-500 hover:scale-105 transition duration-200 hidden sm:block"
-    },
-    user: {
-      link: "user",
-      style: "cursor-pointer hover:text-blue-700 hover:shadow-gray-400 hover:bg-gray-200 hover:scale-105 transition duration-200 hidden sm:block"
-    }
-  }
-
   return (
-    <div>
-    <nav >
-    <ul className="flex justify-evenly items-center list-none pt-1">
-      <li><Link href="/"className={`${roleDashBoard[dataRole]?.style}`}>Home</Link></li>
-      <li><Link href="/produits" className={`${roleDashBoard[dataRole]?.style}`}>Produits</Link></li>
-      <li><Link href={`/${roleDashBoard[dataRole]?.link}`} className={`${roleDashBoard[dataRole]?.style}`}>Dashboard</Link></li>
-      <li>
-      <button
-  onClick={() => document.getElementById("my_modal_4")?.showModal()}
-  className="relative bg-blue-600 text-white p-2 rounded-full hover:bg-blue-500 transition shadow-md"
->
-  {/* Icône du panier */}
-  <ShoppingCart size={16} />
+    <header className="h-14 border-b border-surface-700/50 bg-surface-900/95 backdrop-blur-sm flex items-center px-4 gap-4 shrink-0 z-40">
+      {/* Logo / Brand */}
+      <Link href="/" className="flex items-center gap-2 mr-2 shrink-0">
+        <div className="w-7 h-7 bg-brand-600 rounded-lg flex items-center justify-center shadow-brand">
+          <span className="text-white text-xs font-bold">S</span>
+        </div>
+        <span className="text-white font-semibold text-sm hidden sm:block">Social ERP</span>
+      </Link>
 
-  {/* Badge avec le nombre total de produits */}
-  {totalProductCount > 0 && (
-    <span className="absolute top-0 -right-4 bg-red-600 text-white text-xs font-bold px-2 py-0.5 rounded-full">
-      {totalProductCount}
-    </span>
-  )}
-</button>
-        <dialog id="my_modal_4" className="modal">
-  <div className="modal-box w-11/12 max-w-5xl bg-white rounded-lg shadow-lg relative">
-    {/* Close Button */}
-    <form method="dialog">
-      <button
-        className="btn btn-sm btn-circle btn-ghost absolute right-4 top-4 text-gray-700 hover:bg-gray-200 rounded-full p-2"
-        aria-label="Close"
-      >
-        <X size={20} />
-      </button>
-    </form>
+      {/* Nav links */}
+      <nav className="flex items-center gap-1 flex-1">
+        <Link
+          href="/"
+          className="px-3 py-1.5 text-surface-400 hover:text-white hover:bg-surface-800 rounded-lg text-sm font-medium transition-all duration-150 hidden sm:block"
+        >
+          Accueil
+        </Link>
+        <Link
+          href="/produits"
+          className="px-3 py-1.5 text-surface-400 hover:text-white hover:bg-surface-800 rounded-lg text-sm font-medium transition-all duration-150 hidden sm:block"
+        >
+          Produits
+        </Link>
+        {dataRole && roleDashBoard[dataRole] && (
+          <Link
+            href={`/${roleDashBoard[dataRole].link}`}
+            className="px-3 py-1.5 text-surface-400 hover:text-white hover:bg-surface-800 rounded-lg text-sm font-medium transition-all duration-150 hidden sm:block"
+          >
+            Dashboard
+          </Link>
+        )}
+      </nav>
 
-    {/* Modal Content and Total Section */}
-    <div className="flex justify-between gap-6">
-      {/* Panier Content */}
-      <div className="w-2/3">
-        <h3 className="font-bold text-2xl text-center text-gray-800 mb-6">
-          Votre Panier
-        </h3>
+      {/* Right side */}
+      <div className="flex items-center gap-3 ml-auto">
+        {/* Cart button */}
+        <button
+          onClick={() => document.getElementById("my_modal_4")?.showModal()}
+          className="relative flex items-center justify-center w-9 h-9 bg-surface-800 hover:bg-surface-700 border border-surface-700 hover:border-surface-600 text-surface-300 hover:text-white rounded-lg transition-all duration-150"
+          aria-label="Panier"
+        >
+          <ShoppingCart size={16} />
+          {totalProductCount > 0 && (
+            <span className="absolute -top-1 -right-1 w-4 h-4 bg-brand-500 text-white text-[10px] font-bold rounded-full flex items-center justify-center">
+              {totalProductCount}
+            </span>
+          )}
+        </button>
 
-        {listProduit.length === 0 ? (
-          <p className="text-center text-lg text-gray-600">Votre panier est vide.</p>
-        ) : (
-          <div className="space-y-6">
-            {listProduit.map((element) => (
-              <div
-                key={element.id}
-                className="flex items-center justify-between bg-gray-50 p-4 rounded-lg shadow-md"
-              >
-                <div className="flex items-center gap-4">
-                  <Image
-                    src={element.image}
-                    width={100}
-                    height={100}
-                    alt="photo"
-                    className="rounded-lg"
-                  />
-                  <div>
-                    <p className="text-lg font-semibold">{element.name}</p>
-                    <p className="text-gray-600">Prix : {element.price} €</p>
-                    <p className="text-gray-600">Quantité :   <button
-                    className="px-3 py-2 bg-gray-700 text-white rounded-lg hover:bg-gray-600 transition"
-                    onClick={() => decrementQuantity(element.id)}
-                  >
-                    <Minus size={16} />
-                  </button> {element.quantityProduct}    <button
-                    className="px-3 py-2 bg-gray-700 text-white rounded-lg hover:bg-gray-600 transition"
-                    onClick={() => incrementQuantity(element.id)}
-                  >
-                    <Plus size={16} />
-                  </button> </p>
+        {/* Auth */}
+        <SignedOut>
+          <SignInButton>
+            <button className="px-4 py-1.5 bg-brand-600 hover:bg-brand-500 text-white text-sm font-semibold rounded-lg transition-all duration-150 shadow-brand">
+              Connexion
+            </button>
+          </SignInButton>
+        </SignedOut>
+        <SignedIn>
+          <UserButton />
+        </SignedIn>
+      </div>
+
+      {/* Cart modal */}
+      <dialog id="my_modal_4" className="modal">
+        <div className="modal-box w-11/12 max-w-4xl bg-surface-800 border border-surface-700 rounded-2xl shadow-2xl relative p-0 overflow-hidden">
+          {/* Modal header */}
+          <div className="flex items-center justify-between px-6 py-4 border-b border-surface-700">
+            <h3 className="font-bold text-lg text-white flex items-center gap-2">
+              <ShoppingCart size={18} className="text-brand-400" />
+              Votre Panier
+              {totalProductCount > 0 && (
+                <span className="badge-brand">{totalProductCount} article{totalProductCount > 1 ? "s" : ""}</span>
+              )}
+            </h3>
+            <form method="dialog">
+              <button className="w-8 h-8 flex items-center justify-center bg-surface-700 hover:bg-surface-600 text-surface-300 hover:text-white rounded-lg transition-all duration-150">
+                <X size={16} />
+              </button>
+            </form>
+          </div>
+
+          <div className="flex gap-0">
+            {/* Items */}
+            <div className="flex-1 p-6 overflow-y-auto max-h-[60vh]">
+              {listProduit.length === 0 ? (
+                <div className="flex flex-col items-center justify-center py-16 text-center">
+                  <ShoppingCart size={40} className="text-surface-600 mb-4" />
+                  <p className="text-surface-400 font-medium">Votre panier est vide</p>
+                  <p className="text-surface-500 text-sm mt-1">Ajoutez des produits pour commencer</p>
+                </div>
+              ) : (
+                <div className="space-y-3">
+                  {listProduit.map((element) => (
+                    <div key={element.id} className="flex items-center gap-4 bg-surface-900/50 border border-surface-700/50 p-4 rounded-xl">
+                      <Image
+                        src={element.image}
+                        width={60}
+                        height={60}
+                        alt={element.name}
+                        className="rounded-lg object-contain bg-surface-800 p-1"
+                      />
+                      <div className="flex-1 min-w-0">
+                        <p className="text-white font-semibold text-sm truncate">{element.name}</p>
+                        <p className="text-brand-400 font-bold text-sm mt-0.5">{element.price} €</p>
+                      </div>
+                      <div className="flex items-center gap-2">
+                        <button
+                          onClick={() => decrementQuantity(element.id)}
+                          className="w-7 h-7 flex items-center justify-center bg-surface-700 hover:bg-surface-600 text-surface-300 hover:text-white rounded-md transition-all duration-150"
+                        >
+                          <Minus size={12} />
+                        </button>
+                        <span className="text-white font-semibold text-sm w-5 text-center">{element.quantityProduct}</span>
+                        <button
+                          onClick={() => incrementQuantity(element.id)}
+                          className="w-7 h-7 flex items-center justify-center bg-surface-700 hover:bg-surface-600 text-surface-300 hover:text-white rounded-md transition-all duration-150"
+                        >
+                          <Plus size={12} />
+                        </button>
+                        <button
+                          onClick={() => removeFromCart(element.id)}
+                          className="w-7 h-7 flex items-center justify-center bg-red-500/10 hover:bg-red-500/20 text-red-400 hover:text-red-300 rounded-md transition-all duration-150 ml-1"
+                        >
+                          <X size={12} />
+                        </button>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
+
+            {/* Summary */}
+            {listProduit.length > 0 && (
+              <div className="w-64 p-6 border-l border-surface-700 bg-surface-900/50 flex flex-col">
+                <h4 className="font-semibold text-white mb-4 text-sm uppercase tracking-wider">Résumé</h4>
+                <div className="space-y-3 flex-1">
+                  <div className="flex justify-between text-sm">
+                    <span className="text-surface-400">Livraison</span>
+                    <span className="text-accent-400 font-semibold">Gratuite</span>
+                  </div>
+                  <div className="flex justify-between text-sm border-t border-surface-700 pt-3 mt-3">
+                    <span className="text-white font-semibold">Total</span>
+                    <span className="text-white font-bold text-base">{totalPrice} €</span>
                   </div>
                 </div>
-                <div className="flex items-center gap-2">
-            
+                <div className="mt-6 flex flex-col gap-3">
                   <button
-                    className="px-3 py-2 bg-gray-50 text-gray-800 rounded-lg hover:bg-gray-500 transition hover:text-gray-50"
-                    onClick={() => removeFromCart(element.id)}
+                    onClick={handleBuy}
+                    className="w-full bg-brand-600 hover:bg-brand-500 text-white py-3 rounded-xl font-semibold transition-all duration-200 shadow-brand hover:shadow-glow text-sm"
                   >
-                    <X size={16} />
+                    Payer maintenant
+                    <div className="flex items-center justify-center gap-2 mt-1.5 opacity-70">
+                      <FaCreditCard className="text-sm" />
+                      <FaCcVisa className="text-sm" />
+                      <FaCcMastercard className="text-sm" />
+                      <FaCcAmex className="text-sm" />
+                    </div>
+                  </button>
+                  <button
+                    onClick={clearCart}
+                    className="text-red-400 hover:text-red-300 text-xs font-medium transition-colors text-center"
+                  >
+                    Vider le panier
                   </button>
                 </div>
               </div>
-            ))}
-          </div>
-        )}
-      </div>
-
-      {/* Total and Checkout */}
-      <div className="w-1/3 bg-gray-50 p-6 rounded-lg shadow-md">
-        <h3 className="font-bold text-xl text-gray-800 mb-4 text-center">Résumé</h3>
-        <div className="border-t pt-4 text-lg font-semibold">
-          <div className="flex justify-between text-gray-700 mb-2">
-            <span>Frais de livraison :</span>
-            <span className="font-bold text-green-600">Gratuit</span>
-          </div>
-          <div className="flex justify-between text-gray-700">
-            <span>Total :</span>
-            <span className="font-bold">{totalPrice} €</span>
+            )}
           </div>
         </div>
-        <div className="mt-6 flex flex-col gap-4">
-      <button
-        className="w-full bg-blue-600 text-white py-3 rounded-lg text-lg font-bold hover:bg-blue-500 transition"
-        onClick={handleBuy}
-      >
-        Payer
-        <div className="flex items-center justify-center gap-4 mt-2">
-          <FaCreditCard title="Visa" className="text-2xl" />
-          <FaCcVisa title="Visa" className="text-2xl" />
-          <FaCcMastercard title="MasterCard" className="text-2xl" />
-          <FaCcAmex title="American Express" className="text-2xl" />
-        </div>
-      </button>
-
-      <button
-        className="font-bold text-red-600"
-        onClick={clearCart}
-      >
-        Vider le panier
-      </button>
-    </div>
-      </div>
-    </div>
-  </div>
-</dialog>
-
-      </li>
-     <li className="flex items-center">
-  <SignedOut>
-    <SignInButton />
-  </SignedOut>
-  <SignedIn>
-    <UserButton />
-  </SignedIn>
-</li>
-</ul>
-    </nav>
-  </div>
-  
+        <form method="dialog" className="modal-backdrop">
+          <button>close</button>
+        </form>
+      </dialog>
+    </header>
   );
 }

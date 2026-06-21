@@ -141,7 +141,7 @@ const DetailFormOneUser  = ({ params }: Props) => {
                 {/* {data.id && <input type="hidden" name="id" value={data.id} />} */}
       <div className="flex justify-center items-center flex-col">   
 <label htmlFor="photo" className={`${roleStyles[data.role]?.label}`}>Photo</label>
-        <input type="text" name="photo" value={data.photo}onChange={changeValue} className={`${roleStyles[data.role]?.input} cursor-not-allowed grayscale `} disabled/>
+        <input type="hidden" name="photo" value={data.photo}onChange={changeValue} className={`${roleStyles[data.role]?.input} cursor-not-allowed grayscale `} disabled/>
       
                 {/* Affiche la photo si une URL valide est saisie */}
         {data.photo && (

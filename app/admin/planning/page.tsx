@@ -1,21 +1,33 @@
-import CreatePlanning from '@/app/components/CreatePlanning'
-import Planning from '@/app/components/Planning'
+import CreatePlanning from '@/app/components/CreatePlanning';
+import Planning from '@/app/components/Planning';
+import { Calendar } from 'lucide-react';
 
-export default function pagePlanning() {
+export default function PagePlanning() {
   return (
-<div className=" md:overflow-hidden bg-gradient-to-br from-gray-900 via-gray-800 to-teal-700">
-  <h1 className="text-2xl sm:text-4xl font-bold text-amber-300 mb-3 sm:mb-4 drop-shadow-lg text-center mt-10">Gestion du planning</h1>
-  <div className="flex justify-center items-center md:items-start flex-col md:flex-row md:justify-between gap-10 p-4">
-    {/* Section pour le Planning */}
-    <div className="max-h-[90vh] w-[80%] md:w-[60%] bg-gray-900 p-3 rounded-lg shadow-lg overflow-auto text-amber-300">
-    <Planning />
-  </div>
+    <div className="p-6 h-full flex flex-col gap-6">
+      {/* Header */}
+      <div className="flex items-center gap-3">
+        <div className="w-9 h-9 bg-brand-500/15 border border-brand-500/25 rounded-xl flex items-center justify-center">
+          <Calendar size={16} className="text-brand-400" />
+        </div>
+        <div>
+          <h1 className="text-xl font-bold text-white leading-none">Planning</h1>
+          <p className="text-surface-500 text-xs mt-0.5">Gestion des événements et tâches d&apos;équipe</p>
+        </div>
+      </div>
 
-    {/* Section pour le formulaire */}
-    <div className="w-[80%] md:w-1/3 h-full max-h-[85vh]  text-slate-50 p-4 rounded-lg shadow-lg">
-      <CreatePlanning />
+      {/* Content */}
+      <div className="flex flex-col md:flex-row gap-6 items-start flex-1 min-h-0">
+        {/* Calendar */}
+        <div className="card p-4 flex-1 min-w-0 overflow-auto max-h-[75vh]">
+          <Planning />
+        </div>
+
+        {/* Form */}
+        <div className="shrink-0 w-full md:w-auto">
+          <CreatePlanning />
+        </div>
+      </div>
     </div>
-  </div>
-</div>
-  )
+  );
 }

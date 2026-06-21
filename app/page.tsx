@@ -122,6 +122,106 @@ export default function Home() {
           })}
         </section>
 
+        {/* Role breakdown */}
+        <section className="mt-24 w-full max-w-4xl">
+          <div className="text-center mb-10">
+            <p className="text-surface-500 text-xs font-medium uppercase tracking-widest mb-2">Adapté à chaque profil</p>
+            <h2 className="text-2xl font-bold text-white">Que pouvez-vous faire ?</h2>
+            <p className="text-surface-400 text-sm mt-2 max-w-md mx-auto">
+              Chaque utilisateur accède à un espace personnalisé selon son rôle au sein de l&apos;organisation.
+            </p>
+          </div>
+
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-5">
+            {/* Admin */}
+            <div className="card p-5 flex flex-col gap-4">
+              <div>
+                <div className="inline-flex items-center gap-2 px-2.5 py-1 rounded-lg bg-brand-500/15 border border-brand-500/25 mb-3">
+                  <span className="w-1.5 h-1.5 rounded-full bg-brand-400" />
+                  <span className="text-brand-300 text-xs font-semibold">Administrateur</span>
+                </div>
+                <p className="text-surface-400 text-xs leading-relaxed">
+                  Contrôle total sur l&apos;ensemble de la plateforme.
+                </p>
+              </div>
+              <ul className="space-y-2.5">
+                {[
+                  "Tableau de bord avec statistiques en temps réel",
+                  "Gérer tous les utilisateurs et leurs rôles",
+                  "Créer, modifier et supprimer des produits",
+                  "Visualiser le graphique de stock",
+                  "Gérer le planning de l'équipe",
+                  "Modifier son propre profil",
+                ].map((item) => (
+                  <li key={item} className="flex items-start gap-2 text-surface-300 text-xs">
+                    <svg className="w-3.5 h-3.5 text-brand-400 shrink-0 mt-0.5" fill="currentColor" viewBox="0 0 20 20">
+                      <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
+                    </svg>
+                    {item}
+                  </li>
+                ))}
+              </ul>
+            </div>
+
+            {/* Équipe */}
+            <div className="card p-5 flex flex-col gap-4">
+              <div>
+                <div className="inline-flex items-center gap-2 px-2.5 py-1 rounded-lg bg-accent-500/15 border border-accent-500/25 mb-3">
+                  <span className="w-1.5 h-1.5 rounded-full bg-accent-400" />
+                  <span className="text-accent-400 text-xs font-semibold">Équipe</span>
+                </div>
+                <p className="text-surface-400 text-xs leading-relaxed">
+                  Accès aux outils de travail quotidiens.
+                </p>
+              </div>
+              <ul className="space-y-2.5">
+                {[
+                  "Tableau de bord équipe",
+                  "Créer et modifier des produits",
+                  "Consulter le planning de l'équipe",
+                  "Modifier son propre profil",
+                ].map((item) => (
+                  <li key={item} className="flex items-start gap-2 text-surface-300 text-xs">
+                    <svg className="w-3.5 h-3.5 text-accent-400 shrink-0 mt-0.5" fill="currentColor" viewBox="0 0 20 20">
+                      <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
+                    </svg>
+                    {item}
+                  </li>
+                ))}
+              </ul>
+            </div>
+
+            {/* Utilisateur */}
+            <div className="card p-5 flex flex-col gap-4">
+              <div>
+                <div className="inline-flex items-center gap-2 px-2.5 py-1 rounded-lg bg-surface-600/30 border border-surface-500/30 mb-3">
+                  <span className="w-1.5 h-1.5 rounded-full bg-surface-400" />
+                  <span className="text-surface-300 text-xs font-semibold">Utilisateur</span>
+                </div>
+                <p className="text-surface-400 text-xs leading-relaxed">
+                  Espace client pour acheter et suivre ses commandes.
+                </p>
+              </div>
+              <ul className="space-y-2.5">
+                {[
+                  "Parcourir le catalogue de produits",
+                  "Effectuer des achats via Stripe",
+                  "Consulter l'historique des commandes",
+                  "Télécharger ses factures en PDF",
+                  "Modifier son propre profil",
+                ].map((item) => (
+                  <li key={item} className="flex items-start gap-2 text-surface-300 text-xs">
+                    <svg className="w-3.5 h-3.5 text-surface-400 shrink-0 mt-0.5" fill="currentColor" viewBox="0 0 20 20">
+                      <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
+                    </svg>
+                    {item}
+                  </li>
+                ))}
+              </ul>
+            </div>
+          </div>
+        </section>
+
         {/* Trust indicators */}
         <div className="mt-16 flex items-center gap-8 text-surface-500 text-sm">
           <div className="flex items-center gap-1.5">

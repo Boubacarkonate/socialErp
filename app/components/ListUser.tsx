@@ -1,6 +1,7 @@
 'use client';
 
 import { fetchUsers } from "@/services/servicesUsers";
+import { Users } from "lucide-react";
 import Link from "next/link";
 import { useEffect, useState } from "react";
 
@@ -11,65 +12,117 @@ interface PropsUser {
   email: string;
   role: string;
   clerkUserId: string;
+}
+
+const roleBadge: Record<string, string> = {
+  admin: "badge-brand",
+  team:  "badge-success",
+  user:  "badge bg-surface-600/30 text-surface-300 border border-surface-500/30",
+};
+
+const roleLabel: Record<string, string> = {
+  admin: "Admin",
+  team:  "Équipe",
+  user:  "Utilisateur",
 };
 
 const ListUser = () => {
   const [listUsers, setListUsers] = useState<PropsUser[]>([]);
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    try {
-      const loadUsers = async () => {
+    const loadUsers = async () => {
+      try {
         const list = await fetchUsers();
         setListUsers(list);
-      };
-      loadUsers();
-    } catch (error) {
-      console.error('Erreur lors du chargement des utilisateurs : ', error);
-    }
+      } catch (error) {
+        console.error('Erreur lors du chargement des utilisateurs :', error);
+      } finally {
+        setLoading(false);
+      }
+    };
+    loadUsers();
   }, []);
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-gray-900 via-gray-800 to-teal-700 flex flex-col items-center py-6 px-4 sm:py-10 sm:px-6">
-      
-      <h1 className="text-2xl sm:text-4xl font-bold text-amber-300 mb-3 sm:mb-4 drop-shadow-lg text-center">
-        Liste des Utilisateurs
-      </h1>
-      <div className="w-full max-w-2xl sm:max-w-4xl bg-amber-100 shadow-xl rounded-lg p-4 sm:p-6 border-2 border-amber-300">
-        <ul className="space-y-3 sm:space-y-4">
-          {listUsers.map((element) => (
-            <li
-              key={element.id}
-              className="flex flex-col sm:flex-row items-start sm:items-center justify-between bg-amber-200 p-3 sm:p-4 rounded-md shadow-md border border-amber-300 hover:bg-amber-300 transition-all duration-200"
+    <div className="w-full max-w-3xl mx-auto">
+      {/* Header */}
+      <div className="flex items-center gap-3 mb-6">
+        <div className="w-9 h-9 bg-brand-500/15 border border-brand-500/25 rounded-xl flex items-center justify-center">
+          <Users size={16} className="text-brand-400" />
+        </div>
+        <div>
+          <h1 className="text-xl font-bold text-white leading-none">Utilisateurs</h1>
+          <p className="text-surface-500 text-xs mt-0.5">Gestion des comptes et rôles</p>
+        </div>
+        {!loading && (
+          <span className="badge-brand ml-auto">{listUsers.length} compte{listUsers.length > 1 ? 's' : ''}</span>
+        )}
+      </div>
+
+      {/* Loading */}
+      {loading && (
+        <div className="flex items-center justify-center py-20">
+          <div className="flex flex-col items-center gap-3">
+            <div className="w-8 h-8 border-2 border-brand-500 border-t-transparent rounded-full animate-spin" />
+            <p className="text-surface-400 text-sm">Chargement des utilisateurs...</p>
+          </div>
+        </div>
+      )}
+
+      {/* Empty */}
+      {!loading && listUsers.length === 0 && (
+        <div className="flex flex-col items-center justify-center py-20 text-center">
+          <div className="w-14 h-14 bg-surface-800 rounded-2xl flex items-center justify-center mb-4">
+            <Users size={24} className="text-surface-500" />
+          </div>
+          <p className="text-white font-semibold">Aucun utilisateur trouvé</p>
+        </div>
+      )}
+
+      {/* List */}
+      {!loading && listUsers.length > 0 && (
+        <div className="card divide-y divide-surface-700/50 overflow-hidden">
+          {listUsers.map((user) => (
+            <div
+              key={user.id}
+              className="flex items-center justify-between gap-4 px-5 py-4 hover:bg-surface-700/20 transition-colors duration-150"
             >
-              <div className="flex flex-col sm:flex-row sm:items-center sm:space-x-4 w-full">
-                <div className="text-base sm:text-lg font-semibold text-gray-900">
-                  {element.firstname || "Prénom inconnu"} {element.lastname || "Nom inconnu"}
-                </div>
-                <span className="text-gray-700 text-xs sm:text-sm italic">
-                  {element.email || "Email inconnu"}
-                </span>
-                <span
-                  className={`mt-2 sm:mt-0 px-2 sm:px-3 py-1 rounded-full text-xs sm:text-sm font-semibold shadow-md self-start sm:self-auto ${
-                    element.role === "admin"
-                      ? "bg-green-200 text-green-700 border border-green-400"
-                      : element.role === "team"
-                      ? "bg-blue-200 text-blue-700 border border-blue-400"
-                      : "bg-gray-200 text-gray-700 border border-gray-400"
-                  }`}
-                >
-                  {element.role || "Rôle inconnu"}
+              {/* Avatar placeholder */}
+              <div className="w-9 h-9 bg-brand-600/20 border border-brand-500/20 rounded-full flex items-center justify-center shrink-0">
+                <span className="text-brand-300 text-sm font-bold uppercase">
+                  {(user.firstname?.[0] ?? user.email?.[0] ?? '?')}
                 </span>
               </div>
+
+              {/* Info */}
+              <div className="flex-1 min-w-0">
+                <p className="text-white font-semibold text-sm truncate">
+                  {user.firstname || ''} {user.lastname || ''}
+                  {!user.firstname && !user.lastname && <span className="text-surface-500">Nom inconnu</span>}
+                </p>
+                <p className="text-surface-400 text-xs truncate mt-0.5">{user.email || 'Email inconnu'}</p>
+              </div>
+
+              {/* Role badge */}
+              <span className={roleBadge[user.role] ?? roleBadge.user}>
+                {roleLabel[user.role] ?? user.role ?? 'Inconnu'}
+              </span>
+
+              {/* Link */}
               <Link
-                href={`/admin/utilisateurs/${element.clerkUserId}`}
-                className="mt-2 sm:mt-0 text-teal-700 hover:text-teal-500 font-semibold transition-all duration-200 text-sm sm:text-base"
+                href={`/admin/utilisateurs/${user.clerkUserId}`}
+                className="shrink-0 flex items-center gap-1 text-brand-400 hover:text-brand-300 text-xs font-semibold transition-colors duration-150"
               >
-                Voir Profil →
+                Voir
+                <svg className="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                </svg>
               </Link>
-            </li>
+            </div>
           ))}
-        </ul>
-      </div>
+        </div>
+      )}
     </div>
   );
 };

@@ -1,12 +1,11 @@
 import ListUser from '@/app/components/ListUser';
 
 const AdminUsers = () => {
-
   return (
-    <div>
+    <div className="p-6">
       <ListUser />
     </div>
-  )
-}
+  );
+};
 
-export default AdminUsers
+export default AdminUsers;

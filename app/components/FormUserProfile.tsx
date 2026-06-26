@@ -1,8 +1,8 @@
 'use client'
 
 import { useUser } from "@clerk/nextjs";
-import { Check, Lock, Mail, Shield, Trash2, User } from "lucide-react";
-import Image from "next/image";
+import { Camera, Check, Lock, Mail, Shield, Trash2, User } from "lucide-react";
+import { useRef } from "react";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import { deleteUser, getOneUser, upsertUsertDATA } from "../actions/user";
@@ -33,6 +33,7 @@ const FormUserProfile = () => {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [saving, setSaving] = useState(false);
   const [deleting, setDeleting] = useState(false);
+  const fileInputRef = useRef<HTMLInputElement>(null);
   const { user } = useUser();
   const router = useRouter();
 
@@ -103,6 +104,16 @@ const FormUserProfile = () => {
     setData((prev) => ({ ...prev, [name]: value }));
   };
 
+  const handlePhotoChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    const reader = new FileReader();
+    reader.onload = () => {
+      setData(prev => ({ ...prev, photo: reader.result as string }));
+    };
+    reader.readAsDataURL(file);
+  };
+
   const initials = `${data.firstname?.[0] ?? ""}${data.lastname?.[0] ?? ""}`.toUpperCase();
 
   return (
@@ -118,20 +129,35 @@ const FormUserProfile = () => {
         <div className="px-5 pb-5">
           {/* Avatar + name */}
           <div className="flex items-end justify-between -mt-7 mb-4">
-            <div className="relative">
+            <div className="relative group">
               {data.photo ? (
-                <Image
+                // eslint-disable-next-line @next/next/no-img-element
+                <img
                   src={data.photo}
                   alt="Avatar"
-                  height={56}
-                  width={56}
-                  className="rounded-xl ring-4 ring-surface-800 object-cover"
+                  className="w-14 h-14 rounded-xl ring-4 ring-surface-800 object-cover"
                 />
               ) : (
                 <div className="w-14 h-14 rounded-xl ring-4 ring-surface-800 bg-brand-600/30 border border-brand-500/30 flex items-center justify-center">
                   <span className="text-brand-300 font-bold text-base">{initials || <User size={20} />}</span>
                 </div>
               )}
+              {/* Bouton caméra */}
+              <button
+                type="button"
+                onClick={() => fileInputRef.current?.click()}
+                className="absolute -bottom-1.5 -right-1.5 w-6 h-6 bg-brand-600 hover:bg-brand-500 border-2 border-surface-800 rounded-full flex items-center justify-center transition-all shadow-md"
+                title="Changer la photo"
+              >
+                <Camera size={11} className="text-white" />
+              </button>
+              <input
+                ref={fileInputRef}
+                type="file"
+                accept="image/*"
+                className="hidden"
+                onChange={handlePhotoChange}
+              />
             </div>
             {data.role && (
               <span className={roleBadgeStyles[data.role] || roleBadgeStyles.user}>

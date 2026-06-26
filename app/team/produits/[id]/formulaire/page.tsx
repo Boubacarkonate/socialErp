@@ -23,7 +23,7 @@ function FormUpdateProduct({ params }: { params: Promise<{ id: string }> }) {
     description: "",
     price: 0,
     stock: 0,
-    image: "/produit.png",
+    image: "https://images.unsplash.com/photo-1523275335684-37898b6baf30?w=400&h=400&fit=crop&q=80",
   });
   const [saving, setSaving] = useState(false);
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -38,7 +38,7 @@ function FormUpdateProduct({ params }: { params: Promise<{ id: string }> }) {
           description: p.description || "",
           price: p.price || 0,
           stock: p.stock || 0,
-          image: p.image || "/produit.png",
+          image: p.image || "https://images.unsplash.com/photo-1523275335684-37898b6baf30?w=400&h=400&fit=crop&q=80",
         });
       }
     };

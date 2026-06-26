@@ -1,12 +1,16 @@
+import { getRecentOrders, getTopProducts, getTotalRevenue } from "@/app/actions/order";
 import { getAllPlannings } from "@/app/actions/planning";
 import { getAllProducts } from "@/app/actions/products";
 import { getOneUser } from "@/app/actions/user";
 import { authentification_data } from "@/hooks/autentification&data";
 import { fetchUsers, getUserDetails } from "@/services/servicesUsers";
-import { BarChart3, Calendar, Package, ShieldAlert, Users } from "lucide-react";
+import { BarChart3, Calendar, Package, ShieldAlert, TrendingUp, Users } from "lucide-react";
+import Link from "next/link";
 import FormUserProfile from "../components/FormUserProfile";
 import Planning from "../components/Planning";
 import StockProduct from "../components/StockProduct";
+
+const LOW_STOCK_THRESHOLD = 5;
 
 async function AdminPage() {
   const { userId } = await authentification_data();
@@ -24,12 +28,16 @@ async function AdminPage() {
     );
   }
 
-  const [adminUser, allUsers, allProducts, allPlannings] = await Promise.all([
-    getOneUser(userId),
-    fetchUsers(),
-    getAllProducts(),
-    getAllPlannings(),
-  ]);
+  const [adminUser, allUsers, allProducts, allPlannings, totalRevenue, recentOrders, topProducts] =
+    await Promise.all([
+      getOneUser(userId),
+      fetchUsers(),
+      getAllProducts(),
+      getAllPlannings(),
+      getTotalRevenue(),
+      getRecentOrders(5),
+      getTopProducts(5),
+    ]);
 
   const today = new Date().toLocaleDateString("fr-FR", {
     weekday: "long",
@@ -39,6 +47,7 @@ async function AdminPage() {
   });
 
   const totalStock = allProducts.reduce((sum, p) => sum + (p.stock ?? 0), 0);
+  const lowStockProducts = allProducts.filter((p) => (p.stock ?? 0) <= LOW_STOCK_THRESHOLD);
 
   const statCards = [
     {
@@ -69,13 +78,13 @@ async function AdminPage() {
       sub: "planifiés",
     },
     {
-      label: "Analyses",
-      value: "—",
-      icon: BarChart3,
+      label: "Chiffre d'affaires",
+      value: `${totalRevenue.toFixed(2)} €`,
+      icon: TrendingUp,
       color: "text-amber-400",
       bg: "bg-amber-500/10",
       border: "border-amber-500/20",
-      sub: "stock en temps réel",
+      sub: "total des commandes",
     },
   ];
 
@@ -99,13 +108,25 @@ async function AdminPage() {
           <span className="badge-brand shrink-0">Admin</span>
         </div>
 
+        {/* Alertes stock bas */}
+        {lowStockProducts.length > 0 && (
+          <div className="mt-4 flex items-start gap-3 px-4 py-3 bg-amber-500/10 border border-amber-500/25 rounded-xl">
+            <Package size={14} className="text-amber-400 shrink-0 mt-0.5" />
+            <div>
+              <p className="text-amber-300 text-xs font-semibold">
+                {lowStockProducts.length} produit{lowStockProducts.length > 1 ? 's' : ''} en stock bas (≤ {LOW_STOCK_THRESHOLD} unités)
+              </p>
+              <p className="text-amber-400/70 text-[11px] mt-0.5">
+                {lowStockProducts.map((p) => p.name).join(', ')}
+              </p>
+            </div>
+          </div>
+        )}
+
         {/* Stat cards */}
         <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 mt-5">
           {statCards.map(({ label, value, icon: Icon, color, bg, border, sub }) => (
-            <div
-              key={label}
-              className={`flex flex-col gap-3 p-4 rounded-xl border ${bg} ${border}`}
-            >
+            <div key={label} className={`flex flex-col gap-3 p-4 rounded-xl border ${bg} ${border}`}>
               <div className="flex items-center justify-between">
                 <span className="text-surface-400 text-xs font-medium">{label}</span>
                 <div className={`w-7 h-7 rounded-lg ${bg} border ${border} flex items-center justify-center`}>
@@ -113,7 +134,7 @@ async function AdminPage() {
                 </div>
               </div>
               <div>
-                <p className="text-white text-2xl font-bold leading-none">{value}</p>
+                <p className="text-white text-xl font-bold leading-none">{value}</p>
                 <p className="text-surface-500 text-[11px] mt-1">{sub}</p>
               </div>
             </div>
@@ -130,15 +151,75 @@ async function AdminPage() {
           <FormUserProfile />
         </div>
 
-        {/* Right: Planning + Stock */}
+        {/* Right: sections */}
         <div className="flex flex-col flex-1 gap-5 min-h-0 min-w-0">
+
+          {/* Dernières commandes + Top produits */}
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
+
+            {/* Dernières commandes */}
+            <div className="card p-4">
+              <div className="flex items-center gap-2 mb-3">
+                <BarChart3 size={13} className="text-brand-400" />
+                <span className="text-white text-sm font-semibold">Dernières commandes</span>
+              </div>
+              {recentOrders.length === 0 ? (
+                <p className="text-surface-500 text-xs py-4 text-center">Aucune commande</p>
+              ) : (
+                <div className="space-y-2">
+                  {recentOrders.map((order) => (
+                    <div key={order.id} className="flex items-center justify-between gap-2 py-1.5 border-b border-surface-700/40 last:border-0">
+                      <div className="min-w-0">
+                        <p className="text-white text-xs font-medium truncate">
+                          {order.user.firstname} {order.user.lastname}
+                        </p>
+                        <p className="text-surface-500 text-[11px] truncate">{order.product.name}</p>
+                      </div>
+                      <span className="text-brand-300 text-xs font-bold shrink-0">{order.totalPrice} €</span>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
+
+            {/* Top produits */}
+            <div className="card p-4">
+              <div className="flex items-center gap-2 mb-3">
+                <TrendingUp size={13} className="text-accent-400" />
+                <span className="text-white text-sm font-semibold">Produits les plus vendus</span>
+              </div>
+              {topProducts.length === 0 ? (
+                <p className="text-surface-500 text-xs py-4 text-center">Aucune vente</p>
+              ) : (
+                <div className="space-y-2">
+                  {topProducts.map(({ product, totalSold }, i) => (
+                    <div key={product!.id} className="flex items-center gap-3 py-1.5 border-b border-surface-700/40 last:border-0">
+                      <span className="w-5 h-5 rounded-md bg-surface-700 flex items-center justify-center text-[10px] font-bold text-surface-400 shrink-0">
+                        {i + 1}
+                      </span>
+                      <p className="text-white text-xs font-medium flex-1 truncate">{product!.name}</p>
+                      <span className="text-accent-400 text-xs font-bold shrink-0">{totalSold} vte{totalSold > 1 ? 's' : ''}</span>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
+          </div>
+
+          {/* Planning */}
           <div>
-            <p className="label-field mb-3">Planning de l&apos;équipe</p>
-            <div className="card p-4 overflow-auto" style={{ maxHeight: "42vh" }}>
+            <div className="flex items-center justify-between mb-3">
+              <p className="label-field">Planning de l&apos;équipe</p>
+              <Link href="/admin/planning" className="text-brand-400 hover:text-brand-300 text-xs font-medium transition-colors">
+                Voir tout →
+              </Link>
+            </div>
+            <div className="card p-4 overflow-auto" style={{ maxHeight: "38vh" }}>
               <Planning />
             </div>
           </div>
 
+          {/* Stock */}
           <div className="flex-1 min-h-0">
             <p className="label-field mb-3">Stock des produits</p>
             <div className="card min-h-[220px]">

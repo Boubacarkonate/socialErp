@@ -4,6 +4,36 @@ import { PrismaClient } from "@prisma/client";
 
 const prisma = new PrismaClient();
 
+export const getTotalRevenue = async (): Promise<number> => {
+  const result = await prisma.order.aggregate({ _sum: { totalPrice: true } });
+  return result._sum.totalPrice ?? 0;
+};
+
+export const getRecentOrders = async (limit = 5) => {
+  return prisma.order.findMany({
+    take: limit,
+    orderBy: { createdAt: 'desc' },
+    include: { user: true, product: true },
+  });
+};
+
+export const getTopProducts = async (limit = 5) => {
+  const grouped = await prisma.order.groupBy({
+    by: ['productId'],
+    _sum: { quantity: true },
+    orderBy: { _sum: { quantity: 'desc' } },
+    take: limit,
+  });
+
+  const products = await Promise.all(
+    grouped.map(async (g) => {
+      const product = await prisma.product.findUnique({ where: { id: g.productId } });
+      return { product, totalSold: g._sum.quantity ?? 0 };
+    })
+  );
+  return products.filter((p) => p.product !== null);
+};
+
 //CREER UNE COMMANDE
 export const createOrder = async (quantity: number, totalPrice: number, userId: number, productId: number) => {
     if (quantity < 0 || !userId || !productId) {

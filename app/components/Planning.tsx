@@ -3,8 +3,9 @@
 import dayGridPlugin from '@fullcalendar/daygrid';
 import FullCalendar from '@fullcalendar/react';
 import timeGridPlugin from '@fullcalendar/timegrid';
+import { Trash2, X } from 'lucide-react';
 import { useEffect, useState } from 'react';
-import { getAllPlannings } from '../actions/planning';
+import { deleteDatePlanning, getAllPlannings } from '../actions/planning';
 
 const BRAND_COLORS = [
   '#6366f1', '#8b5cf6', '#10b981', '#f59e0b',
@@ -18,24 +19,55 @@ const getNextColor = () => {
   return color;
 };
 
-export const Planning = () => {
-  const [events, setEvents] = useState([]);
+type CalendarEvent = {
+  id: number;
+  title: string;
+  start: string;
+  end: string;
+  color: string;
+};
 
-  useEffect(() => {
-    const fetchData = async () => {
-      const data = await getAllPlannings();
-      colorIndex = 0;
-      const formattedData = data.map((planning) => ({
+type SelectedEvent = {
+  id: number;
+  title: string;
+};
+
+export const Planning = () => {
+  const [events, setEvents] = useState<CalendarEvent[]>([]);
+  const [selected, setSelected] = useState<SelectedEvent | null>(null);
+  const [deleting, setDeleting] = useState(false);
+
+  const fetchData = async () => {
+    const data = await getAllPlannings();
+    colorIndex = 0;
+    setEvents(
+      data.map((planning) => ({
         id: planning.id,
         title: planning.title,
         start: new Date(planning.startDate).toISOString().split('T')[0],
         end: new Date(planning.endDate).toISOString().split('T')[0],
         color: getNextColor(),
-      }));
-      setEvents(formattedData);
-    };
+      }))
+    );
+  };
+
+  useEffect(() => {
     fetchData();
   }, []);
+
+  const handleDelete = async () => {
+    if (!selected) return;
+    setDeleting(true);
+    try {
+      await deleteDatePlanning(selected.id);
+      setEvents((prev) => prev.filter((e) => e.id !== selected.id));
+      setSelected(null);
+    } catch (err) {
+      console.error('Erreur suppression planning', err);
+    } finally {
+      setDeleting(false);
+    }
+  };
 
   return (
     <div className="planning-wrapper">
@@ -88,6 +120,7 @@ export const Planning = () => {
           font-size: 0.7rem !important;
           font-weight: 500 !important;
           padding: 1px 4px !important;
+          cursor: pointer !important;
         }
         .planning-wrapper .fc-scrollgrid {
           border-radius: 0.75rem;
@@ -102,6 +135,7 @@ export const Planning = () => {
           background: rgba(99,102,241,0.04);
         }
       `}</style>
+
       <FullCalendar
         plugins={[dayGridPlugin, timeGridPlugin]}
         initialView="dayGridMonth"
@@ -119,7 +153,62 @@ export const Planning = () => {
           month: 'Mois',
           week: 'Semaine',
         }}
+        eventClick={(info) => {
+          setSelected({
+            id: Number(info.event.id),
+            title: info.event.title,
+          });
+        }}
       />
+
+      {/* Modal suppression */}
+      {selected && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+          <div
+            className="absolute inset-0 bg-black/70 backdrop-blur-sm"
+            onClick={() => !deleting && setSelected(null)}
+          />
+          <div className="relative card p-6 w-full max-w-sm animate-fade-in">
+            <button
+              onClick={() => setSelected(null)}
+              className="absolute top-4 right-4 text-surface-500 hover:text-white transition-colors"
+            >
+              <X size={16} />
+            </button>
+            <div className="w-10 h-10 bg-red-500/10 border border-red-500/20 rounded-xl flex items-center justify-center mb-4">
+              <Trash2 size={18} className="text-red-400" />
+            </div>
+            <h3 className="text-white font-bold text-base mb-1">Supprimer l&apos;événement</h3>
+            <p className="text-surface-400 text-sm mb-1">
+              Voulez-vous supprimer cet événement ?
+            </p>
+            <p className="text-brand-300 text-sm font-semibold mb-5">&ldquo;{selected.title}&rdquo;</p>
+            <div className="flex gap-3">
+              <button
+                onClick={() => setSelected(null)}
+                disabled={deleting}
+                className="btn-ghost flex-1 text-sm"
+              >
+                Annuler
+              </button>
+              <button
+                onClick={handleDelete}
+                disabled={deleting}
+                className="flex-1 bg-red-500 hover:bg-red-600 disabled:opacity-60 text-white font-semibold py-2 px-4 rounded-lg text-sm transition-all duration-150 flex items-center justify-center gap-2"
+              >
+                {deleting ? (
+                  <>
+                    <span className="w-3.5 h-3.5 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+                    Suppression…
+                  </>
+                ) : (
+                  'Supprimer'
+                )}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };

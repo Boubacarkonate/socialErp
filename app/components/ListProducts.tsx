@@ -1,28 +1,34 @@
 "use client";
 
 import { useUser } from "@clerk/nextjs";
-import { ChevronLeft, ChevronRight, Package, Plus, Search, ShoppingCart, SlidersHorizontal } from "lucide-react";
+import { ChevronLeft, ChevronRight, FolderOpen, Package, Plus, Search, ShoppingCart, SlidersHorizontal } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
 import { useEffect, useMemo, useState } from "react";
 import { getAllProducts } from "../actions/products";
+import { getAllCategories } from "../actions/categories";
 import { getOneUser } from "../actions/user";
 import { useProductsContext } from "../Context/CartContext";
 
 interface Product {
   id: number;
   name: string;
-  description: string;
-  image: string;
+  description: string | null;
+  image: string | null;
   price: number;
   stock: number;
-  userId: string;
+  userId: number | null;
+  categoryId: number | null;
+  category: { id: number; name: string } | null;
 }
+
+type Category = { id: number; name: string };
 
 const PAGE_SIZE = 8;
 
 function ListProducts() {
   const [products, setProducts] = useState<Product[]>([]);
+  const [categories, setCategories] = useState<Category[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
   const [toastMessage, setToastMessage] = useState<string | null>(null);
@@ -30,14 +36,18 @@ function ListProducts() {
 
   const [search, setSearch] = useState("");
   const [sortBy, setSortBy] = useState<"name" | "price_asc" | "price_desc" | "stock">("name");
+  const [categoryFilter, setCategoryFilter] = useState<number | null>(null);
   const [page, setPage] = useState(1);
 
   const { user } = useUser();
   const { addToCart } = useProductsContext();
 
   useEffect(() => {
-    getAllProducts()
-      .then(setProducts)
+    Promise.all([getAllProducts(), getAllCategories()])
+      .then(([prods, cats]) => {
+        setProducts(prods as Product[]);
+        setCategories(cats);
+      })
       .catch((err) => setError("Impossible de charger les produits. " + err))
       .finally(() => setLoading(false));
   }, []);
@@ -49,29 +59,27 @@ function ListProducts() {
       .catch(() => {});
   }, [user?.id]);
 
-  // Reset page on search/sort change
-  useEffect(() => { setPage(1); }, [search, sortBy]);
+  useEffect(() => { setPage(1); }, [search, sortBy, categoryFilter]);
 
   const filtered = useMemo(() => {
     let list = [...products];
+    if (categoryFilter !== null) list = list.filter(p => p.categoryId === categoryFilter);
     if (search.trim()) {
       const q = search.toLowerCase();
-      list = list.filter(
-        (p) => p.name.toLowerCase().includes(q) || p.description?.toLowerCase().includes(q)
-      );
+      list = list.filter(p => p.name.toLowerCase().includes(q) || p.description?.toLowerCase().includes(q));
     }
     if (sortBy === "price_asc") list.sort((a, b) => a.price - b.price);
     else if (sortBy === "price_desc") list.sort((a, b) => b.price - a.price);
     else if (sortBy === "stock") list.sort((a, b) => b.stock - a.stock);
     else list.sort((a, b) => a.name.localeCompare(b.name));
     return list;
-  }, [products, search, sortBy]);
+  }, [products, search, sortBy, categoryFilter]);
 
   const totalPages = Math.max(1, Math.ceil(filtered.length / PAGE_SIZE));
   const paginated = filtered.slice((page - 1) * PAGE_SIZE, page * PAGE_SIZE);
 
   const handleAddProduct = (product: Product) => {
-    addToCart({ ...product, quantityProduct: 1 });
+    addToCart({ ...product, image: product.image ?? "https://images.unsplash.com/photo-1523275335684-37898b6baf30?w=400&h=400&fit=crop&q=80", quantityProduct: 1 });
     setToastMessage(`"${product.name}" ajouté au panier`);
     setTimeout(() => setToastMessage(null), 3000);
   };
@@ -92,36 +100,66 @@ function ListProducts() {
         {!loading && <span className="badge-brand">{filtered.length} produit{filtered.length !== 1 ? 's' : ''}</span>}
       </div>
 
-      {/* Search + sort */}
+      {/* Filters */}
       {!loading && !error && products.length > 0 && (
-        <div className="flex flex-col sm:flex-row gap-3 mb-5">
-          <div className="relative flex-1">
-            <Search size={13} className="absolute left-3 top-1/2 -translate-y-1/2 text-surface-500 pointer-events-none" />
-            <input
-              type="text"
-              value={search}
-              onChange={(e) => setSearch(e.target.value)}
-              placeholder="Rechercher un produit…"
-              className="input-field pl-8 text-sm"
-            />
+        <div className="space-y-3 mb-5">
+          <div className="flex flex-col sm:flex-row gap-3">
+            <div className="relative flex-1">
+              <Search size={13} className="absolute left-3 top-1/2 -translate-y-1/2 text-surface-500 pointer-events-none" />
+              <input
+                type="text"
+                value={search}
+                onChange={(e) => setSearch(e.target.value)}
+                placeholder="Rechercher un produit…"
+                className="input-field pl-8 text-sm"
+              />
+            </div>
+            <div className="relative">
+              <SlidersHorizontal size={13} className="absolute left-3 top-1/2 -translate-y-1/2 text-surface-500 pointer-events-none" />
+              <select
+                value={sortBy}
+                onChange={(e) => setSortBy(e.target.value as typeof sortBy)}
+                className="input-field pl-8 text-sm pr-8 appearance-none"
+              >
+                <option value="name">Nom (A-Z)</option>
+                <option value="price_asc">Prix croissant</option>
+                <option value="price_desc">Prix décroissant</option>
+                <option value="stock">Stock</option>
+              </select>
+            </div>
           </div>
-          <div className="relative">
-            <SlidersHorizontal size={13} className="absolute left-3 top-1/2 -translate-y-1/2 text-surface-500 pointer-events-none" />
-            <select
-              value={sortBy}
-              onChange={(e) => setSortBy(e.target.value as typeof sortBy)}
-              className="input-field pl-8 text-sm pr-8 appearance-none"
-            >
-              <option value="name">Nom (A-Z)</option>
-              <option value="price_asc">Prix croissant</option>
-              <option value="price_desc">Prix décroissant</option>
-              <option value="stock">Stock</option>
-            </select>
-          </div>
+
+          {/* Category pills */}
+          {categories.length > 0 && (
+            <div className="flex flex-wrap gap-2">
+              <button
+                onClick={() => setCategoryFilter(null)}
+                className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold border transition-all ${
+                  categoryFilter === null
+                    ? "bg-brand-600 border-brand-500 text-white"
+                    : "bg-surface-800 border-surface-700 text-surface-400 hover:border-brand-500/40 hover:text-white"
+                }`}
+              >
+                <FolderOpen size={10} /> Tous
+              </button>
+              {categories.map(c => (
+                <button
+                  key={c.id}
+                  onClick={() => setCategoryFilter(c.id)}
+                  className={`px-3 py-1 rounded-full text-xs font-semibold border transition-all ${
+                    categoryFilter === c.id
+                      ? "bg-brand-600 border-brand-500 text-white"
+                      : "bg-surface-800 border-surface-700 text-surface-400 hover:border-brand-500/40 hover:text-white"
+                  }`}
+                >
+                  {c.name}
+                </button>
+              ))}
+            </div>
+          )}
         </div>
       )}
 
-      {/* States */}
       {loading && (
         <div className="flex items-center justify-center py-24">
           <div className="flex flex-col items-center gap-3">
@@ -148,22 +186,24 @@ function ListProducts() {
           <p className="text-white font-semibold">
             {search ? `Aucun résultat pour "${search}"` : "Aucun produit disponible"}
           </p>
-          {search && (
-            <button onClick={() => setSearch("")} className="mt-3 text-brand-400 text-sm hover:text-brand-300 transition-colors">
-              Effacer la recherche
+          {(search || categoryFilter !== null) && (
+            <button
+              onClick={() => { setSearch(""); setCategoryFilter(null); }}
+              className="mt-3 text-brand-400 text-sm hover:text-brand-300 transition-colors"
+            >
+              Effacer les filtres
             </button>
           )}
         </div>
       )}
 
-      {/* Product grid */}
       {!loading && !error && paginated.length > 0 && (
         <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
           {paginated.map((product) => (
-            <div key={product.id} className="card-hover flex flex-col overflow-hidden group animate-fade-in">
+            <div key={product.id} className="card-hover flex flex-col overflow-hidden group">
               <Link href={`/produits/${product.id}`} className="block relative overflow-hidden bg-surface-900/50 h-44">
                 <Image
-                  src={product.image}
+                  src={product.image || "https://images.unsplash.com/photo-1523275335684-37898b6baf30?w=400&h=400&fit=crop&q=80"}
                   alt={product.name}
                   fill
                   className="object-contain p-4 group-hover:scale-105 transition-transform duration-500"
@@ -176,6 +216,11 @@ function ListProducts() {
                 {product.stock === 0 && (
                   <span className="absolute top-2 right-2 px-2 py-0.5 bg-red-500/20 border border-red-500/30 rounded-md text-red-300 text-[10px] font-semibold">
                     Épuisé
+                  </span>
+                )}
+                {product.category && (
+                  <span className="absolute bottom-2 left-2 px-2 py-0.5 bg-black/50 backdrop-blur-sm rounded-md text-white/70 text-[10px] font-medium">
+                    {product.category.name}
                   </span>
                 )}
               </Link>
@@ -207,7 +252,6 @@ function ListProducts() {
         </div>
       )}
 
-      {/* Pagination */}
       {!loading && totalPages > 1 && (
         <div className="flex items-center justify-center gap-2 mt-8">
           <button
@@ -240,7 +284,6 @@ function ListProducts() {
         </div>
       )}
 
-      {/* Admin link */}
       {userRole === "admin" && !loading && (
         <div className="mt-8 flex justify-center">
           <Link
@@ -253,9 +296,8 @@ function ListProducts() {
         </div>
       )}
 
-      {/* Toast */}
       {toastMessage && (
-        <div className="fixed bottom-5 right-5 z-50 flex items-center gap-2.5 px-4 py-3 bg-surface-800 border border-brand-500/30 rounded-xl shadow-2xl animate-fade-in">
+        <div className="fixed bottom-5 right-5 z-50 flex items-center gap-2.5 px-4 py-3 bg-surface-800 border border-brand-500/30 rounded-xl shadow-2xl">
           <div className="w-7 h-7 bg-brand-500/20 rounded-lg flex items-center justify-center shrink-0">
             <ShoppingCart size={13} className="text-brand-400" />
           </div>

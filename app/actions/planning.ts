@@ -1,24 +1,29 @@
 'use server'
 
 import { prisma } from "../../lib/prisma";
+import { unstable_cache } from "next/cache";
 
-export const getAllPlannings = async() => {
-    try {
-        const allPlannings = await prisma.planning.findMany({
-            select: {
-                id: true,
-                title: true,
-                startDate: true,
-                endDate: true,
-                userId: true
-            }
-        });
-        return allPlannings; // Retourne même un tableau vide si aucun planning n'est trouvé
-    } catch (error) {
-        console.error("Erreur dans la récupération des plannings", error);
-        throw new Error("Impossible de récupérer les plannings.");
-      }
-}
+export const getAllPlannings = unstable_cache(
+    async () => {
+        try {
+            const allPlannings = await prisma.planning.findMany({
+                select: {
+                    id: true,
+                    title: true,
+                    startDate: true,
+                    endDate: true,
+                    userId: true
+                }
+            });
+            return allPlannings;
+        } catch (error) {
+            console.error("Erreur dans la récupération des plannings", error);
+            throw new Error("Impossible de récupérer les plannings.");
+        }
+    },
+    ["all-plannings"],
+    { revalidate: 30 }
+);
 
 // Récupérer le planning d'un utilisateur spécifique
 export const getUserPlanning = async (userId: number) => {

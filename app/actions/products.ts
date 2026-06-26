@@ -1,18 +1,23 @@
 'use server'
 
 import { PrismaClient } from "@prisma/client";
+import { unstable_cache } from "next/cache";
 
-const prisma =new PrismaClient();
+const prisma = new PrismaClient();
 
-export const getAllProducts = async () => {
-    try {
-        const list_products = await prisma.product.findMany();
-        return list_products;
-    } catch (error) {
-        console.error("erreur dans la récupération de la liste des produits", error);
-        throw new Error("Erreur interne du serveur.");
-    }
-}
+export const getAllProducts = unstable_cache(
+    async () => {
+        try {
+            const list_products = await prisma.product.findMany();
+            return list_products;
+        } catch (error) {
+            console.error("erreur dans la récupération de la liste des produits", error);
+            throw new Error("Erreur interne du serveur.");
+        }
+    },
+    ["all-products"],
+    { revalidate: 30 }
+);
 
 export const getOneProduct = async (id: number) => {
     try {

@@ -6,6 +6,8 @@ import { authentification_data } from "@/hooks/autentification&data";
 import { fetchUsers, getUserDetails } from "@/services/servicesUsers";
 import { BarChart3, Calendar, Package, ShieldAlert, TrendingUp, Users } from "lucide-react";
 import Link from "next/link";
+import ExportButtons from "./ExportButtons";
+import ActivityLog from "../components/ActivityLog";
 import FormUserProfile from "../components/FormUserProfile";
 import Planning from "../components/Planning";
 import StockProduct from "../components/StockProduct";
@@ -105,7 +107,10 @@ async function AdminPage() {
               Voici un aperçu de votre espace d&apos;administration.
             </p>
           </div>
-          <span className="badge-brand shrink-0">Admin</span>
+          <div className="flex items-center gap-3 shrink-0">
+            <ExportButtons />
+            <span className="badge-brand">Admin</span>
+          </div>
         </div>
 
         {/* Alertes stock bas */}
@@ -220,10 +225,16 @@ async function AdminPage() {
           </div>
 
           {/* Stock */}
-          <div className="flex-1 min-h-0">
-            <p className="label-field mb-3">Stock des produits</p>
-            <div className="card min-h-[220px]">
-              <StockProduct />
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
+            <div>
+              <p className="label-field mb-3">Stock des produits</p>
+              <div className="card min-h-[220px]">
+                <StockProduct />
+              </div>
+            </div>
+            <div>
+              <p className="label-field mb-3">Activité récente</p>
+              <ActivityLog />
             </div>
           </div>
         </div>

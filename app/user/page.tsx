@@ -1,14 +1,18 @@
+import { getUserStats } from "@/app/actions/order";
 import { getOneUser } from "@/app/actions/user";
 import FormUserProfile from "@/app/components/FormUserProfile";
 import Header from "@/app/components/hearder/Header";
 import Historique from "@/app/components/Historique";
 import { authentification_data } from "@/hooks/autentification&data";
-import { Calendar, Receipt, ShoppingBag, User } from "lucide-react";
+import { getUserDetails } from "@/services/servicesUsers";
+import { Calendar, Package, Receipt, ShoppingBag } from "lucide-react";
 import Image from "next/image";
 
 const DashboardUser = async () => {
   const { userId } = await authentification_data();
   const userData = await getOneUser(userId);
+  const { id: dbId } = await getUserDetails(userId);
+  const stats = await getUserStats(dbId as number);
 
   const joinDate = new Date(userData.createdAt).toLocaleDateString("fr-FR", {
     month: "long",
@@ -16,6 +20,27 @@ const DashboardUser = async () => {
   });
 
   const initials = `${userData.firstname?.[0] ?? ""}${userData.lastname?.[0] ?? ""}`.toUpperCase();
+
+  const statCards = [
+    {
+      icon: ShoppingBag,
+      label: "Commandes",
+      value: stats.orderCount.toString(),
+      desc: "achats effectués",
+    },
+    {
+      icon: Receipt,
+      label: "Total dépensé",
+      value: `${stats.totalSpent.toFixed(2)} €`,
+      desc: "depuis l'inscription",
+    },
+    {
+      icon: Package,
+      label: "Produit préféré",
+      value: stats.favoriteProduct ?? "—",
+      desc: "le plus commandé",
+    },
+  ];
 
   return (
     <div className="min-h-screen bg-surface-900">
@@ -25,7 +50,6 @@ const DashboardUser = async () => {
 
         {/* Hero profile banner */}
         <div className="card overflow-hidden">
-          {/* Gradient bar */}
           <div className="h-16 bg-gradient-to-r from-brand-900/80 via-brand-800/40 to-surface-800 relative">
             <div className="absolute inset-0 opacity-20"
               style={{ backgroundImage: "radial-gradient(circle at 20% 50%, #6366f1 0%, transparent 60%)" }} />
@@ -64,21 +88,18 @@ const DashboardUser = async () => {
           </div>
         </div>
 
-        {/* Quick stats */}
+        {/* Stat cards dynamiques */}
         <div className="grid grid-cols-3 gap-3">
-          {[
-            { icon: User,        label: "Profil",    desc: "Informations personnelles" },
-            { icon: ShoppingBag, label: "Achats",    desc: "Historique des commandes" },
-            { icon: Receipt,     label: "Factures",  desc: "Documents téléchargeables" },
-          ].map(({ icon: Icon, label, desc }) => (
-            <div key={label} className="card px-4 py-3 flex items-center gap-3">
-              <div className="w-8 h-8 bg-brand-500/10 border border-brand-500/20 rounded-lg flex items-center justify-center shrink-0">
-                <Icon size={14} className="text-brand-400" />
+          {statCards.map(({ icon: Icon, label, value, desc }) => (
+            <div key={label} className="card px-4 py-4 flex flex-col gap-2">
+              <div className="flex items-center gap-2">
+                <div className="w-7 h-7 bg-brand-500/10 border border-brand-500/20 rounded-lg flex items-center justify-center shrink-0">
+                  <Icon size={13} className="text-brand-400" />
+                </div>
+                <p className="text-surface-400 text-xs font-medium uppercase tracking-wider">{label}</p>
               </div>
-              <div className="min-w-0">
-                <p className="text-white text-sm font-semibold leading-none">{label}</p>
-                <p className="text-surface-500 text-[11px] mt-0.5 truncate">{desc}</p>
-              </div>
+              <p className="text-white font-bold text-xl leading-none truncate">{value}</p>
+              <p className="text-surface-500 text-[11px]">{desc}</p>
             </div>
           ))}
         </div>

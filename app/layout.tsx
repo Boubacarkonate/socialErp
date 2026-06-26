@@ -5,6 +5,8 @@ import type { Metadata } from "next";
 import { Inter } from "next/font/google";
 import { ProductsProvider } from "./Context/CartContext";
 import { SideBarProvider } from "./Context/SideBarContext";
+import { ThemeProvider } from "./Context/ThemeContext";
+import Chatbot from "./components/Chatbot";
 import "./globals.css";
 
 const inter = Inter({
@@ -39,11 +41,14 @@ export default function RootLayout({
     >
       <html lang="fr" className={inter.variable}>
         <body className={`${inter.className} antialiased`} suppressHydrationWarning>
-          <SideBarProvider>
-            <ProductsProvider>
-              {children}
-            </ProductsProvider>
-          </SideBarProvider>
+          <ThemeProvider>
+            <SideBarProvider>
+              <ProductsProvider>
+                {children}
+                <Chatbot />
+              </ProductsProvider>
+            </SideBarProvider>
+          </ThemeProvider>
         </body>
       </html>
     </ClerkProvider>

@@ -3,6 +3,19 @@
 @tailwind utilities;
 
 :root {
+  /* Surface scale — dark mode (default) */
+  --surface-50:  248 250 252;
+  --surface-100: 241 245 249;
+  --surface-200: 226 232 240;
+  --surface-300: 203 213 225;
+  --surface-400: 148 163 184;
+  --surface-500: 100 116 139;
+  --surface-600: 71 85 105;
+  --surface-700: 51 65 85;
+  --surface-800: 30 41 59;
+  --surface-900: 15 23 42;
+  --surface-950: 2 6 23;
+
   --background: #0f172a;
   --foreground: #f1f5f9;
   --brand: #6366f1;
@@ -16,6 +29,68 @@
   --text-muted: #64748b;
   --accent: #10b981;
   --danger: #ef4444;
+}
+
+/* Light mode — surface scale inversé */
+:root.light {
+  --surface-50:  2 6 23;
+  --surface-100: 15 23 42;
+  --surface-200: 30 41 59;
+  --surface-300: 51 65 85;
+  --surface-400: 71 85 105;
+  --surface-500: 100 116 139;
+  --surface-600: 148 163 184;
+  --surface-700: 203 213 225;
+  --surface-800: 241 245 249;
+  --surface-900: 248 250 252;
+  --surface-950: 255 255 255;
+
+  --background: #f8fafc;
+  --foreground: #0f172a;
+  --surface: #e2e8f0;
+  --surface-elevated: #cbd5e1;
+  --border: rgba(51, 65, 85, 0.15);
+  --border-hover: rgba(51, 65, 85, 0.3);
+  --text-primary: #0f172a;
+  --text-secondary: #334155;
+  --text-muted: #475569;
+}
+
+/* Light mode — overrides texte et hover */
+:root.light body { color: rgb(15 23 42); }
+
+/* text-white devient sombre SAUF sur fonds colorés */
+:root.light .text-white:not([class*="bg-brand"]):not([class*="bg-accent"]):not([class*="bg-red"]):not([class*="bg-amber"]):not([class*="bg-purple"]) {
+  color: rgb(15 23 42) !important;
+}
+
+/* Forcer blanc sur boutons et badges colorés */
+:root.light .btn-brand,
+:root.light .btn-brand *,
+:root.light [class*="bg-brand-6"] *,
+:root.light [class*="bg-brand-5"] * {
+  color: #fff !important;
+}
+
+/* Hover links nav header et sidebar : background plus visible */
+:root.light .hover\:bg-surface-800:hover {
+  background-color: rgb(203 213 225 / 0.6) !important;
+}
+:root.light .hover\:bg-surface-700:hover {
+  background-color: rgb(203 213 225 / 0.8) !important;
+}
+:root.light .hover\:text-white:hover {
+  color: rgb(15 23 42) !important;
+}
+
+/* Sidebar active */
+:root.light .sidebar-link-active {
+  background: rgba(99, 102, 241, 0.12) !important;
+  color: rgb(15 23 42) !important;
+}
+:root.light .sidebar-link:hover {
+  background: rgb(203 213 225 / 0.6) !important;
+  color: rgb(15 23 42) !important;
 }
 
 * {

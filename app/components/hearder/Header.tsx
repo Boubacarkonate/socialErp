@@ -4,8 +4,9 @@ import { createBuy } from "@/app/actions/order";
 import { paymentStripe } from "@/app/actions/stripe";
 import { getOneUser } from "@/app/actions/user";
 import { useProductsContext } from "@/app/Context/CartContext";
+import { useTheme } from "@/app/Context/ThemeContext";
 import { SignInButton, UserButton, useUser } from "@clerk/nextjs";
-import { Minus, Plus, ShoppingCart, X } from "lucide-react";
+import { Minus, Moon, Plus, ShoppingCart, Sun, X } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
 import { useEffect, useState } from "react";
@@ -31,6 +32,7 @@ export default function Header() {
   const totalPrice = listProduit.reduce((total, el) => total + el.price * el.quantityProduct, 0);
   const [dataRole, setDataRole] = useState<keyof RoleDashboard | undefined>();
   const { user } = useUser();
+  const { theme, toggle } = useTheme();
 
   const handleBuy = async () => {
     if (!user?.id) {
@@ -100,6 +102,16 @@ export default function Header() {
 
       {/* Right side */}
       <div className="flex items-center gap-3 ml-auto">
+        {/* Theme toggle */}
+        <button
+          onClick={toggle}
+          className="flex items-center justify-center w-9 h-9 bg-surface-800 hover:bg-surface-700 border border-surface-700 hover:border-surface-600 text-surface-300 hover:text-white rounded-lg transition-all duration-150"
+          aria-label="Changer le thème"
+          title={theme === 'dark' ? 'Passer en mode clair' : 'Passer en mode sombre'}
+        >
+          {theme === 'dark' ? <Sun size={15} /> : <Moon size={15} />}
+        </button>
+
         {/* Cart button */}
         <button
           onClick={() => document.getElementById("my_modal_4")?.showModal()}

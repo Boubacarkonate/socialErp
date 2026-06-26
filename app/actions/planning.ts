@@ -2,6 +2,7 @@
 
 import { prisma } from "../../lib/prisma";
 import { unstable_cache } from "next/cache";
+import { logActivity } from "./activityLog";
 
 export const getAllPlannings = unstable_cache(
     async () => {
@@ -75,7 +76,8 @@ export const addPlanning = async (formData: FormData)=>{
             userId
         }
       })
-      return createDate; // Retourne l'événement créé ou mis à jour
+      await logActivity('Événement planifié', 'planning', 'system', title);
+      return createDate;
     } catch (error) {
       console.error("Erreur dans la création des horaires du planning", error);
       throw new Error("Impossible de créer le planning.");

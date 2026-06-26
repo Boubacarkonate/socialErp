@@ -4,6 +4,28 @@ import { PrismaClient } from "@prisma/client";
 
 const prisma = new PrismaClient();
 
+export const getUserStats = async (userId: number) => {
+  const orders = await prisma.order.findMany({
+    where: { userId },
+    include: { product: true },
+  });
+
+  const totalSpent = orders.reduce((sum, o) => sum + o.totalPrice, 0);
+  const orderCount = orders.length;
+
+  // Produit préféré = le plus commandé
+  const productCount: Record<number, { name: string; count: number }> = {};
+  for (const o of orders) {
+    if (!productCount[o.productId]) {
+      productCount[o.productId] = { name: o.product.name, count: 0 };
+    }
+    productCount[o.productId].count += o.quantity;
+  }
+  const favorite = Object.values(productCount).sort((a, b) => b.count - a.count)[0] ?? null;
+
+  return { totalSpent, orderCount, favoriteProduct: favorite?.name ?? null };
+};
+
 export const getTotalRevenue = async (): Promise<number> => {
   const result = await prisma.order.aggregate({ _sum: { totalPrice: true } });
   return result._sum.totalPrice ?? 0;

@@ -1,5 +1,6 @@
 'use server'
 import { PrismaClient } from "@prisma/client";
+import { logActivity } from "./activityLog";
 
 const prisma = new PrismaClient();
 
@@ -108,9 +109,8 @@ try {
       email,
       role,
       photo,
-    }, 
+    },
     create: {
-      // id,  car généré automatiquement (voir model)
       clerkUserId,
       firstname,
       lastname,
@@ -119,6 +119,7 @@ try {
       photo
     },
   })
+  await logActivity('Profil mis à jour', 'user', email, `${firstname} ${lastname}`);
   return user;
 } catch (error) {
   console.error("Erreur lors de la crétion ou la modification de l'utilisateur :", error);

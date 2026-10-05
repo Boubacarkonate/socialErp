@@ -54,7 +54,7 @@ export default function SignInPage() {
           </div>
 
           {/* Test credentials */}
-          <div className="card p-4 space-y-3">
+          <div className="card credentials-box p-4 space-y-3">
             <p className="text-surface-400 text-xs font-semibold uppercase tracking-wider flex items-center gap-1.5">
               <Lock size={10} />
               Identifiants de test

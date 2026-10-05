@@ -83,6 +83,14 @@
   color: rgb(15 23 42) !important;
 }
 
+/* Identifiants de test : labels de rôle lisibles en mode light
+   (les couleurs de marque -300/-400 sont trop claires sur fond clair) */
+:root.light .credentials-box .text-brand-300  { color: #4338ca !important; } /* Admin  */
+:root.light .credentials-box .text-accent-400 { color: #047857 !important; } /* Team   */
+:root.light .credentials-box .text-purple-400 { color: #7e22ce !important; } /* User   */
+:root.light .credentials-box .text-surface-300 { color: #1e293b !important; } /* emails (identifiants) */
+:root.light .credentials-box .text-surface-500 { color: #475569 !important; } /* mots de passe */
+
 /* Sidebar active */
 :root.light .sidebar-link-active {
   background: rgba(99, 102, 241, 0.12) !important;

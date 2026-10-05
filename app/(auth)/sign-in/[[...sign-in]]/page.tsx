@@ -1,5 +1,5 @@
-import { SignIn } from '@clerk/nextjs';
 import { BarChart3, Lock, Shield, Users } from 'lucide-react';
+import ClerkCard from './ClerkCard';
 
 const credentials = [
   { role: 'Admin', email: 'admin@test.com', password: 'PasswordAdmin1234', color: 'text-brand-300', bg: 'bg-brand-500/10 border-brand-500/20' },
@@ -71,7 +71,7 @@ export default function SignInPage() {
 
         {/* Right: Clerk SignIn */}
         <div className="shrink-0">
-          <SignIn />
+          <ClerkCard />
         </div>
       </div>
     </div>

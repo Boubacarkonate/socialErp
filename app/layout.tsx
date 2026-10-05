@@ -32,10 +32,7 @@ export default function RootLayout({
         baseTheme: dark,
         variables: {
           colorPrimary: "#6366f1",
-          colorBackground: "#0f172a",
-          colorInputBackground: "#1e293b",
-          colorInputText: "#f1f5f9",
-          borderRadius: "0.5rem",
+          borderRadius: "0.75rem",
         },
       }}
     >

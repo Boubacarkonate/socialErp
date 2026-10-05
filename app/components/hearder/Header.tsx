@@ -3,6 +3,7 @@
 import { createBuy } from "@/app/actions/order";
 import { paymentStripe } from "@/app/actions/stripe";
 import { getOneUser } from "@/app/actions/user";
+import { clerkAppearance } from "@/app/Context/clerkAppearance";
 import { useProductsContext } from "@/app/Context/CartContext";
 import { useTheme } from "@/app/Context/ThemeContext";
 import { SignInButton, UserButton, useUser } from "@clerk/nextjs";
@@ -134,7 +135,7 @@ export default function Header() {
             </button>
           </SignInButton>
         ) : (
-          <UserButton />
+          <UserButton appearance={clerkAppearance(theme === 'dark')} />
         )}
       </div>
 

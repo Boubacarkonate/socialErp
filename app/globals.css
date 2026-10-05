@@ -64,11 +64,14 @@
   color: rgb(15 23 42) !important;
 }
 
-/* Forcer blanc sur boutons et badges colorés */
+/* Forcer blanc sur boutons/badges à fond brand SOLIDE uniquement.
+   On utilise ~= (token exact) pour NE PAS matcher les teintes à opacité
+   comme bg-brand-500/10 ou bg-brand-600/20, sinon le texte des cartes
+   à fond translucide deviendrait blanc et illisible en mode light. */
 :root.light .btn-brand,
 :root.light .btn-brand *,
-:root.light [class*="bg-brand-6"] *,
-:root.light [class*="bg-brand-5"] * {
+:root.light [class~="bg-brand-600"] *,
+:root.light [class~="bg-brand-500"] * {
   color: #fff !important;
 }
 
